@@ -25,11 +25,11 @@ class OrderSeeder extends Seeder
 
         foreach ($months as $monthOffset) {
             $orderCount = rand(3, 8);
-            
+
             for ($i = 0; $i < $orderCount; $i++) {
                 $user = $users->random();
                 $product = $products->random();
-                $quantity = rand(1, 5);
+                $quantity = rand(100, 500);
                 $status = $statuses[array_rand($statuses)];
                 $orderDate = Carbon::now()->subMonths($monthOffset)->subDays(rand(0, 28));
 

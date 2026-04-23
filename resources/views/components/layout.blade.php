@@ -14,9 +14,12 @@
             @include('components.header')
 
             @if(session('success'))
-                <div class="mb-4 p-4 bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl">
+                <div id="toast" class="fixed top-4 right-4 bg-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
                     {{ session('success') }}
                 </div>
+                <script>
+                    setTimeout(() => document.getElementById('toast')?.remove(), 3000);
+                </script>
             @endif
 
             <main class="p-8">

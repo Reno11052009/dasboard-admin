@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Order;
+use App\Notifications\ProductActionNotification;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -160,6 +161,8 @@ class AdminController extends Controller
 
         $product->save();
 
+        $user->notify(new ProductActionNotification('create', $product->name));
+
         return redirect()->route('products')->with('success', 'Product created successfully.');
     }
 
@@ -197,6 +200,8 @@ class AdminController extends Controller
 
         $product->save();
 
+        $user->notify(new ProductActionNotification('update', $product->name));
+
         return redirect()->route('products')->with('success', 'Product updated successfully.');
     }
 
@@ -209,5 +214,63 @@ class AdminController extends Controller
         $product->delete();
 
         return redirect()->route('products')->with('success', 'Product deleted successfully.');
+    }
+
+    public function createUser()
+    {
+        return view('user.create');
+    }
+
+    public function storeUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password,
+        ]);
+
+        return redirect()->route('users')->with('success', 'User created successfully.');
+    }
+
+    public function editUser($id)
+    {
+        $user = User::findOrFail($id);
+        return view('user.edit', compact('user'));
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'password' => 'nullable|min:8|confirmed',
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        if ($request->password) {
+            $user->password = $request->password;
+        }
+
+        $user->save();
+
+        return redirect()->route('users')->with('success', 'User updated successfully.');
+    }
+
+    public function deleteUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('users')->with('success', 'User deleted successfully.');
     }
 }
