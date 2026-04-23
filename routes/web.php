@@ -26,3 +26,7 @@ Route::put('/admin/products/{id}', [AdminController::class, 'updateProduct'])->n
 Route::delete('/admin/products/{id}', [AdminController::class, 'deleteProduct'])->name('product.delete');
 
 Route::get('/admin/sales', [AdminController::class, 'sales'])->name('sales');
+Route::get('/admin/orders', [AdminController::class, 'orders'])->name('orders');
+Route::get('/admin/orders/{id}/edit', [AdminController::class, 'editOrder'])->name('orders.edit');
+Route::put('/admin/orders/{id}', [AdminController::class, 'updateOrder'])->name('orders.update');
+Route::delete('/admin/orders/{id}', [AdminController::class, 'deleteOrder'])->name('orders.delete');
