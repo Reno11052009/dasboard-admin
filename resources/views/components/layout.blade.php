@@ -22,9 +22,10 @@
                 </script>
             @endif
 
-            <main class="p-8">
+            <main class="p-8 flex-1">
                 @yield('content')
             </main>
+            @include('components.footer')
         </div>
     </div>
 </body>

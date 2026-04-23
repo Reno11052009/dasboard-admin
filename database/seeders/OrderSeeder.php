@@ -29,7 +29,7 @@ class OrderSeeder extends Seeder
             for ($i = 0; $i < $orderCount; $i++) {
                 $user = $users->random();
                 $product = $products->random();
-                $quantity = rand(100, 500);
+                $quantity = rand(1, 10);
                 $status = $statuses[array_rand($statuses)];
                 $orderDate = Carbon::now()->subMonths($monthOffset)->subDays(rand(0, 28));
 

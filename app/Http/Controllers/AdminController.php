@@ -92,7 +92,41 @@ class AdminController extends Controller
             'data' => $data,
         ];
 
-        return view('index', compact('userCount', 'productCount', 'orderCount', 'totalSales', 'chartData', 'period', 'startDate', 'endDate'));
+        $topSellingProducts = Order::with('product')
+            ->where('status', 'completed')
+            ->selectRaw('product_id, SUM(quantity) as total_qty, SUM(total_price) as total')
+            ->groupBy('product_id')
+            ->orderByDesc('total_qty')
+            ->limit(5)
+            ->get();
+
+        $lowStockProducts = Product::orderBy('stok', 'asc')->limit(5)->get();
+
+        $recentSales = Order::with('user', 'product')
+            ->where('status', 'completed')
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $productSales = Order::with('product')
+            ->where('status', 'completed')
+            ->selectRaw('product_id, SUM(quantity) as total_qty')
+            ->groupBy('product_id')
+            ->orderByDesc('total_qty')
+            ->limit(5)
+            ->get();
+
+        $totalQty = $productSales->sum('total_qty');
+        
+        $productSalesData = [
+            'labels' => $productSales->pluck('product.name')->toArray(),
+            'data' => $productSales->pluck('total_qty')->toArray(),
+            'percentages' => $productSales->map(function($item) use ($totalQty) {
+                return $totalQty > 0 ? round($item->total_qty / $totalQty * 100, 1) : 0;
+            })->toArray(),
+        ];
+
+        return view('index', compact('userCount', 'productCount', 'orderCount', 'totalSales', 'chartData', 'period', 'startDate', 'endDate', 'topSellingProducts', 'lowStockProducts', 'recentSales', 'productSalesData'));
     }
 
     public function sales()
@@ -121,18 +155,36 @@ class AdminController extends Controller
             ->limit(10)
             ->get();
 
-        return view('sales', compact('totalSales', 'totalOrders', 'completedOrders', 'pendingOrders', 'monthlySales', 'topProducts', 'recentOrders'));
+        // return view('sales', compact('totalSales', 'totalOrders', 'completedOrders', 'pendingOrders', 'monthlySales', 'topProducts', 'recentOrders'));
     }
 
-    public function users()
+    public function users(Request $request)
     {
-        $users = User::latest()->get();
+        $search = $request->get('search');
+        
+        $query = User::query();
+        
+        if ($search) {
+            $query->where('name', 'like', "%$search%")
+                ->orWhere('email', 'like', "%$search%");
+        }
+        
+        $users = $query->latest()->get();
         return view('user.users', compact('users'));
     }
 
-    public function products()
+    public function products(Request $request)
     {
-        $products = \App\Models\Product::latest()->get();
+        $search = $request->get('search');
+        
+        $query = \App\Models\Product::query();
+        
+        if ($search) {
+            $query->where('name', 'like', "%$search%")
+                ->orWhere('category', 'like', "%$search%");
+        }
+        
+        $products = $query->latest()->get();
         return view('product.product', compact('products'));
     }
 
@@ -324,5 +376,13 @@ class AdminController extends Controller
         $order->delete();
 
         return redirect()->route('orders')->with('success', 'Order deleted successfully.');
+    }
+
+    public function logout(Request $request)
+    {
+        $request->session()->flush();
+        $request->session()->regenerate();
+        
+        return redirect('/')->with('success', 'Logged out successfully.');
     }
 }
