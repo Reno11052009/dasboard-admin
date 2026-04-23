@@ -1,6 +1,6 @@
 <aside class="w-64 bg-slate-800 text-white flex-shrink-0 hidden md:flex flex-col">
     <div class="p-6 text-2xl font-bold text-center border-b border-slate-700">
-        DASBOARD ADMIN
+        <a href="/admin">DASBOARD ADMIN</a>
     </div>
     <nav class="flex-1 mt-4 px-4 space-y-2">
         <p class="text-xs uppercase text-slate-400 font-semibold leading-6">main</p>

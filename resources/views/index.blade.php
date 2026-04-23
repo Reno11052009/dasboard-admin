@@ -15,10 +15,20 @@
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
         <p class="text-2xl font-bold text-amber-600">{{ $orderCount }}</p>
         <p class="text-sm text-gray-500">Total Orders</p>
+        @if(isset($ordersChange))
+        <p class="text-xs {{ $ordersChange >= 0 ? 'text-green-500' : 'text-red-500' }}">
+            {{ $ordersChange >= 0 ? '+' : '' }}{{ $ordersChange }}%
+        </p>
+        @endif
     </div>
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
         <p class="text-2xl font-bold text-emerald-600">{{ number_format($totalSales, 0, ',', '.') }}</p>
         <p class="text-sm text-gray-500">Total Pendapatan</p>
+        @if(isset($salesChange))
+        <p class="text-xs {{ $salesChange >= 0 ? 'text-green-500' : 'text-red-500' }}">
+            {{ $salesChange >= 0 ? '+' : '' }}{{ $salesChange }}%
+        </p>
+        @endif
     </div>
 </div>
 

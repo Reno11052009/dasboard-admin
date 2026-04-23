@@ -31,4 +31,4 @@ Route::get('/admin/orders/{id}/edit', [AdminController::class, 'editOrder'])->na
 Route::put('/admin/orders/{id}', [AdminController::class, 'updateOrder'])->name('orders.update');
 Route::delete('/admin/orders/{id}', [AdminController::class, 'deleteOrder'])->name('orders.delete');
 
-Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

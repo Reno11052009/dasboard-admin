@@ -45,6 +45,25 @@ class AdminController extends Controller
         $productCount = Product::count();
         $orderCount = Order::count();
 
+        $thisMonth = Carbon::now()->startOfMonth();
+        $lastMonth = Carbon::now()->subMonth()->startOfMonth();
+        
+        $currentMonthSales = Order::where('order_date', '>=', $thisMonth)->where('status', 'completed')->sum('total_price');
+        $lastMonthSales = Order::whereBetween('order_date', [$lastMonth, $thisMonth->subDay()])->where('status', 'completed')->sum('total_price');
+        
+        $salesChange = 0;
+        if ($lastMonthSales > 0) {
+            $salesChange = round(($currentMonthSales - $lastMonthSales) / $lastMonthSales * 100, 1);
+        }
+        
+        $currentMonthOrders = Order::where('order_date', '>=', $thisMonth)->count();
+        $lastMonthOrders = Order::whereBetween('order_date', [$lastMonth, $thisMonth->subDay()])->count();
+        
+        $ordersChange = 0;
+        if ($lastMonthOrders > 0) {
+            $ordersChange = round(($currentMonthOrders - $lastMonthOrders) / $lastMonthOrders * 100, 1);
+        }
+
         $query = Order::where('status', 'completed');
 
         if ($startDate && $endDate) {
@@ -149,7 +168,7 @@ class AdminController extends Controller
             })->toArray(),
         ];
 
-        return view('index', compact('userCount', 'productCount', 'orderCount', 'totalSales', 'chartData', 'period', 'startDate', 'endDate', 'topSellingProducts', 'lowStockProducts', 'recentSales', 'productSalesData'));
+        return view('index', compact('userCount', 'productCount', 'orderCount', 'totalSales', 'chartData', 'period', 'startDate', 'endDate', 'topSellingProducts', 'lowStockProducts', 'recentSales', 'productSalesData', 'salesChange', 'ordersChange'));
     }
 
     public function sales()
@@ -429,13 +448,5 @@ class AdminController extends Controller
         $order->delete();
 
         return redirect()->route('orders')->with('success', 'Order deleted successfully.');
-    }
-
-    public function logout(Request $request)
-    {
-        $request->session()->flush();
-        $request->session()->regenerate();
-        
-        return redirect('/')->with('success', 'Logged out successfully.');
     }
 }
