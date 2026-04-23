@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+Route::get('/', [AuthController::class, 'showLoginForm']);
+Route::post('/', [AuthController::class, 'login']);
 
 Route::get('/admin', [AdminController::class, 'index'])->name('index');
 Route::get('/admin/users', [AdminController::class, 'users'])->name('users');

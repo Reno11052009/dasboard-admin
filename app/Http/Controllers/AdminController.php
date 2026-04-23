@@ -12,8 +12,31 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
+    private function checkAuth($request)
+    {
+        if (!auth()->check()) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        }
+        if (auth()->user()->role === 'user') {
+            return redirect('/')->with('error', 'Anda tidak memiliki akses');
+        }
+        return null;
+    }
+
+    private function checkSuperAdmin($request)
+    {
+        if (!auth()->check() || auth()->user()->role !== 'super_admin') {
+            return redirect()->route('index')->with('error', 'Akses ditolak');
+        }
+        return null;
+    }
+
     public function index(Request $request)
     {
+        if ($redirect = $this->checkAuth($request)) {
+            return $redirect;
+        }
+        
         $period = $request->get('period', 'monthly');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
@@ -160,6 +183,10 @@ class AdminController extends Controller
 
     public function users(Request $request)
     {
+        if ($redirect = $this->checkSuperAdmin($request)) {
+            return $redirect;
+        }
+        
         $search = $request->get('search');
         
         $query = User::query();
@@ -175,6 +202,10 @@ class AdminController extends Controller
 
     public function products(Request $request)
     {
+        if ($redirect = $this->checkAuth($request)) {
+            return $redirect;
+        }
+        
         $search = $request->get('search');
         
         $query = \App\Models\Product::query();
@@ -190,6 +221,10 @@ class AdminController extends Controller
 
     public function storeProduct(Request $request)
     {
+        if ($redirect = $this->checkAuth($request)) {
+            return $redirect;
+        }
+        
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -270,11 +305,18 @@ class AdminController extends Controller
 
     public function createUser()
     {
+        if ($redirect = $this->checkSuperAdmin(request())) {
+            return $redirect;
+        }
+        
         return view('user.create');
     }
 
     public function storeUser(Request $request)
     {
+        if ($redirect = $this->checkSuperAdmin($request)) {
+            return $redirect;
+        }
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -292,12 +334,19 @@ class AdminController extends Controller
 
     public function editUser($id)
     {
+        if ($redirect = $this->checkSuperAdmin(request())) {
+            return $redirect;
+        }
+        
         $user = User::findOrFail($id);
         return view('user.edit', compact('user'));
     }
 
     public function updateUser(Request $request, $id)
     {
+        if ($redirect = $this->checkSuperAdmin($request)) {
+            return $redirect;
+        }
         $user = User::findOrFail($id);
 
         $request->validate([
@@ -320,6 +369,10 @@ class AdminController extends Controller
 
     public function deleteUser($id)
     {
+        if ($redirect = $this->checkSuperAdmin(request())) {
+            return $redirect;
+        }
+        
         $user = User::findOrFail($id);
         $user->delete();
 
