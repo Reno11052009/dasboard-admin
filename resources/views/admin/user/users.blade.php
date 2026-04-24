@@ -19,15 +19,17 @@
             <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
             <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
         </select>
-        @if(request('search') || request('role') || request('limit'))
-        <a href="{{ route('users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 cursor-pointer">Reset</a>
-        @endif
+
         <select name="limit" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer" onchange="this.form.submit()">
             <option value="10" {{ request('limit') == 10 ? 'selected' : '' }}>10 Baris</option>
             <option value="25" {{ request('limit') == 25 ? 'selected' : '' }}>25 Baris</option>
             <option value="50" {{ request('limit') == 50 ? 'selected' : '' }}>50 Baris</option>
             <option value="all" {{ request('limit') == 'all' ? 'selected' : '' }}>Semua</option>
         </select>
+
+        @if(request('search') || request('role') || request('limit'))
+        <a href="{{ route('users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 cursor-pointer">Reset</a>
+        @endif
     </div>
 </form>
 

@@ -4,28 +4,28 @@
 
 @section('content')
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-        <p class="text-2xl font-bold text-slate-800">{{ $userCount }}</p>
-        <p class="text-sm text-gray-500">Total Users</p>
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center overflow-hidden flex flex-col justify-center">
+        <p class="text-xl lg:text-2xl font-bold text-slate-800 truncate" title="{{ $userCount }}">{{ $userCount }}</p>
+        <p class="text-xs lg:text-sm text-gray-500 truncate" title="Total Users">Total Users</p>
     </div>
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-        <p class="text-2xl font-bold text-indigo-600">{{ $productCount }}</p>
-        <p class="text-sm text-gray-500">Total Products</p>
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center overflow-hidden flex flex-col justify-center">
+        <p class="text-xl lg:text-2xl font-bold text-indigo-600 truncate" title="{{ $productCount }}">{{ $productCount }}</p>
+        <p class="text-xs lg:text-sm text-gray-500 truncate" title="Total Products">Total Products</p>
     </div>
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-        <p class="text-2xl font-bold text-amber-600">{{ $orderCount }}</p>
-        <p class="text-sm text-gray-500">Total Orders</p>
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center overflow-hidden flex flex-col justify-center">
+        <p class="text-xl lg:text-2xl font-bold text-amber-600 truncate" title="{{ $orderCount }}">{{ $orderCount }}</p>
+        <p class="text-xs lg:text-sm text-gray-500 truncate" title="Total Orders">Total Orders</p>
         @if(isset($ordersChange))
-        <p class="text-xs {{ $ordersChange >= 0 ? 'text-green-500' : 'text-red-500' }}">
+        <p class="text-xs truncate {{ $ordersChange >= 0 ? 'text-green-500' : 'text-red-500' }}">
             {{ $ordersChange >= 0 ? '+' : '' }}{{ $ordersChange }}%
         </p>
         @endif
     </div>
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-        <p class="text-2xl font-bold text-emerald-600">{{ number_format($totalSales, 0, ',', '.') }}</p>
-        <p class="text-sm text-gray-500">Total Pendapatan</p>
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center overflow-hidden flex flex-col justify-center">
+        <p class="text-xl lg:text-2xl font-bold text-emerald-600 truncate" title="{{ number_format($totalSales, 0, ',', '.') }}">{{ number_format($totalSales, 0, ',', '.') }}</p>
+        <p class="text-xs lg:text-sm text-gray-500 truncate" title="Total Pendapatan">Total Pendapatan</p>
         @if(isset($salesChange))
-        <p class="text-xs {{ $salesChange >= 0 ? 'text-green-500' : 'text-red-500' }}">
+        <p class="text-xs truncate {{ $salesChange >= 0 ? 'text-green-500' : 'text-red-500' }}">
             {{ $salesChange >= 0 ? '+' : '' }}{{ $salesChange }}%
         </p>
         @endif

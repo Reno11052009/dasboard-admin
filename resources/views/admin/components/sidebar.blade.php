@@ -6,7 +6,7 @@
         </button>
     </div>
     <nav class="flex-1 mt-4 px-4 space-y-2">
-        <p class="text-xs uppercase text-slate-400 font-semibold leading-6">main</p>
+        <label class="text-xs uppercase text-slate-400 font-semibold leading-6">main</label>
         <a href="{{ route('index') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Dashboard</a>
         @auth
         @if(Auth::user()->role === 'super_admin')
@@ -15,7 +15,7 @@
         @endauth
         <a href="{{ route('products') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Products</a>
         <a href="{{ route('orders') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Orders</a>
-        <p class="text-xs uppercase text-slate-400 font-semibold leading-6">settings</p>
+        <label class="text-xs uppercase text-slate-400 font-semibold leading-6">settings</label>
         <a href="{{ route('account') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Account</a>
         <form action="{{ route('logout') }}" method="POST">
             @csrf
