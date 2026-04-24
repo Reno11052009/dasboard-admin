@@ -26,6 +26,7 @@
             <tr>
                 <th class="px-6 py-4 text-xs font-semibold text-gray-500">GAMBAR</th>
                 <th class="px-6 py-4 text-xs font-semibold text-gray-500">NAMA PRODUK</th>
+                <th class="px-6 py-4 text-xs font-semibold text-gray-500">KATEGORI</th>
                 <th class="px-6 py-4 text-xs font-semibold text-gray-500">STOK</th>
                 <th class="px-6 py-4 text-xs font-semibold text-gray-500">HARGA</th>
                 <th class="px-6 py-4 text-xs font-semibold text-gray-500 text-right">AKSI</th>
@@ -44,6 +45,7 @@
                     @endif
                 </td>
                 <td class="px-6 py-4 font-medium text-gray-800">{{ $product->name }}</td>
+                <td class="px-6 py-4">{{ $product->category ?? 'Tidak ada kategori' }}</td>
                 <td class="px-6 py-4">
                     <span class="px-2 py-1 {{ $product->stok < 10 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }} rounded text-xs font-bold">
                         {{ $product->stok }}

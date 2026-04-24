@@ -36,7 +36,7 @@ class AdminController extends Controller
         if ($redirect = $this->checkAuth($request)) {
             return $redirect;
         }
-        
+
         $period = $request->get('period', 'monthly');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
@@ -47,18 +47,18 @@ class AdminController extends Controller
 
         $thisMonth = Carbon::now()->startOfMonth();
         $lastMonth = Carbon::now()->subMonth()->startOfMonth();
-        
+
         $currentMonthSales = Order::where('order_date', '>=', $thisMonth)->where('status', 'completed')->sum('total_price');
         $lastMonthSales = Order::whereBetween('order_date', [$lastMonth, $thisMonth->subDay()])->where('status', 'completed')->sum('total_price');
-        
+
         $salesChange = 0;
         if ($lastMonthSales > 0) {
             $salesChange = round(($currentMonthSales - $lastMonthSales) / $lastMonthSales * 100, 1);
         }
-        
+
         $currentMonthOrders = Order::where('order_date', '>=', $thisMonth)->count();
         $lastMonthOrders = Order::whereBetween('order_date', [$lastMonth, $thisMonth->subDay()])->count();
-        
+
         $ordersChange = 0;
         if ($lastMonthOrders > 0) {
             $ordersChange = round(($currentMonthOrders - $lastMonthOrders) / $lastMonthOrders * 100, 1);
@@ -159,7 +159,7 @@ class AdminController extends Controller
             ->get();
 
         $totalQty = $productSales->sum('total_qty');
-        
+
         $productSalesData = [
             'labels' => $productSales->pluck('product.name')->toArray(),
             'data' => $productSales->pluck('total_qty')->toArray(),
@@ -168,7 +168,7 @@ class AdminController extends Controller
             })->toArray(),
         ];
 
-        return view('index', compact('userCount', 'productCount', 'orderCount', 'totalSales', 'chartData', 'period', 'startDate', 'endDate', 'topSellingProducts', 'lowStockProducts', 'recentSales', 'productSalesData', 'salesChange', 'ordersChange'));
+        return view('admin.index', compact('userCount', 'productCount', 'orderCount', 'totalSales', 'chartData', 'period', 'startDate', 'endDate', 'topSellingProducts', 'lowStockProducts', 'recentSales', 'productSalesData', 'salesChange', 'ordersChange'));
     }
 
     public function sales()
@@ -205,18 +205,18 @@ class AdminController extends Controller
         if ($redirect = $this->checkSuperAdmin($request)) {
             return $redirect;
         }
-        
+
         $search = $request->get('search');
-        
+
         $query = User::query();
-        
+
         if ($search) {
             $query->where('name', 'like', "%$search%")
                 ->orWhere('email', 'like', "%$search%");
         }
-        
+
         $users = $query->latest()->get();
-        return view('user.users', compact('users'));
+        return view('admin.user.users', compact('users'));
     }
 
     public function products(Request $request)
@@ -224,18 +224,18 @@ class AdminController extends Controller
         if ($redirect = $this->checkAuth($request)) {
             return $redirect;
         }
-        
+
         $search = $request->get('search');
-        
+
         $query = \App\Models\Product::query();
-        
+
         if ($search) {
             $query->where('name', 'like', "%$search%")
                 ->orWhere('category', 'like', "%$search%");
         }
-        
+
         $products = $query->latest()->get();
-        return view('product.product', compact('products'));
+        return view('admin.product.product', compact('products'));
     }
 
     public function storeProduct(Request $request)
@@ -243,7 +243,7 @@ class AdminController extends Controller
         if ($redirect = $this->checkAuth($request)) {
             return $redirect;
         }
-        
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -275,7 +275,7 @@ class AdminController extends Controller
     public function editProduct($id)
     {
         $product = \App\Models\Product::findOrFail($id);
-        return view('product.edit', compact('product'));
+        return view('admin.product.edit', compact('product'));
     }
 
     public function updateProduct(Request $request, $id)
@@ -327,8 +327,8 @@ class AdminController extends Controller
         if ($redirect = $this->checkSuperAdmin(request())) {
             return $redirect;
         }
-        
-        return view('user.create');
+
+        return view('admin.user.create');
     }
 
     public function storeUser(Request $request)
@@ -356,9 +356,9 @@ class AdminController extends Controller
         if ($redirect = $this->checkSuperAdmin(request())) {
             return $redirect;
         }
-        
+
         $user = User::findOrFail($id);
-        return view('user.edit', compact('user'));
+        return view('admin.user.edit', compact('user'));
     }
 
     public function updateUser(Request $request, $id)
@@ -391,7 +391,7 @@ class AdminController extends Controller
         if ($redirect = $this->checkSuperAdmin(request())) {
             return $redirect;
         }
-        
+
         $user = User::findOrFail($id);
         $user->delete();
 
@@ -420,13 +420,13 @@ class AdminController extends Controller
         $orders = $query->latest()->get();
         $statusCounts = Order::selectRaw('status, COUNT(*) as count')->groupBy('status')->get()->keyBy('status');
 
-        return view('order.orders', compact('orders', 'statusCounts'));
+        return view('admin.order.orders', compact('orders', 'statusCounts'));
     }
 
     public function editOrder($id)
     {
         $order = Order::with('user', 'product')->findOrFail($id);
-        return view('order.edit', compact('order'));
+        return view('admin.order.edit', compact('order'));
     }
 
     public function updateOrder(Request $request, $id)
