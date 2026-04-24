@@ -3,7 +3,6 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SalesController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
@@ -26,8 +25,6 @@ Route::post('/admin/products', [ProductController::class, 'store'])->name('produ
 Route::get('/admin/products/{id}/edit', [ProductController::class, 'edit'])->name('product.edit');
 Route::put('/admin/products/{id}', [ProductController::class, 'update'])->name('product.update');
 Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('product.delete');
-
-Route::get('/admin/sales', [SalesController::class, 'index'])->name('sales');
 
 Route::get('/admin/orders', [OrderController::class, 'index'])->name('orders');
 Route::get('/admin/orders/{id}/edit', [OrderController::class, 'edit'])->name('orders.edit');
