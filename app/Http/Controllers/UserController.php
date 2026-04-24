@@ -125,7 +125,7 @@ class UserController extends Controller
     public function account()
     {
         $user = auth()->user();
-        return view('admin.account', compact('user'));
+        return view('admin.user.account', compact('user'));
     }
 
     public function updateAccount(Request $request)

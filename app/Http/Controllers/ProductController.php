@@ -91,6 +91,16 @@ class ProductController extends Controller
         return redirect()->route('products')->with('success', 'Product created successfully.');
     }
 
+    public function show($id)
+    {
+        if (!auth()->check()) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        }
+
+        $product = Product::findOrFail($id);
+        return view('admin.product.show', compact('product'));
+    }
+
     public function edit($id)
     {
         if (!auth()->check()) {

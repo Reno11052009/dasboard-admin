@@ -14,6 +14,13 @@ Route::get('/welcome', function () {
     return view('welcome');
 })->name('welcome')->middleware('auth');
 
+Route::get('/clear-cache', function() {
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('route:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    return 'Cache berhasil dibersihkan! Silakan kembali ke halaman sebelumnya dan muat ulang (refresh).';
+});
+
 Route::get('/admin', [DashboardController::class, 'index'])->name('index');
 
 Route::get('/admin/users', [UserController::class, 'index'])->name('users');
@@ -28,6 +35,7 @@ Route::put('/admin/account', [UserController::class, 'updateAccount'])->name('ac
 
 Route::get('/admin/products', [ProductController::class, 'index'])->name('products');
 Route::get('/admin/products/create', [ProductController::class, 'create'])->name('product.create');
+Route::get('/admin/products/{id}', [ProductController::class, 'show'])->name('product.show');
 Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');
 Route::get('/admin/products/{id}/edit', [ProductController::class, 'edit'])->name('product.edit');
 Route::put('/admin/products/{id}', [ProductController::class, 'update'])->name('product.update');
