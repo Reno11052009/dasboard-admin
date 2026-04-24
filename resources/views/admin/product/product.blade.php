@@ -1,4 +1,4 @@
-@extends('components.layout')
+@extends('admin.components.layout')
 
 @section('header', 'Product Management')
 
@@ -57,7 +57,7 @@
                     <form action="{{ route('product.delete', $product->id) }}" method="POST" class="inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="text-red-600 hover:underline cursor-pointer" onclick="return confirm('Hapus produk ini?')">Hapus</button>
+                        <button type="submit" class="text-red-600 hover:underline cursor-pointer" onclick="confirmDelete(event, this)">Hapus</button>
                     </form>
                 </td>
             </tr>

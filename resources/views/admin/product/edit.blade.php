@@ -1,4 +1,4 @@
-@extends('components.layout')
+@extends('admin.components.layout')
 
 @section('header', 'Edit Product')
 
@@ -12,7 +12,16 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-8">
-            <form action="/admin/products/{{ $product->id }}" method="POST" class="space-y-6">
+            @if ($errors->any())
+                <div class="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            <form action="/admin/products/{{ $product->id }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 @method('PUT')
 
@@ -45,7 +54,7 @@
 
                 <div>
                     <label for="image">Gambar Produk</label>
-                    <input type="file" name="image" id="image"
+                    <input type="file" name="image" id="image" accept="image/*"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none transition">
                 </div>
 

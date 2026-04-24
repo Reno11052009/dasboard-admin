@@ -1,4 +1,4 @@
-@extends('components.layout')
+@extends('admin.components.layout')
 
 @section('header', 'Add New User')
 
@@ -45,7 +45,7 @@
 
                 <div class="pt-4 flex items-center gap-3">
                     <button type="submit"
-                        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-indigo-200">
+                        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-indigo-200 cursor-pointer">
                         Simpan User
                     </button>
                     <a href="{{ route('users') }}"
