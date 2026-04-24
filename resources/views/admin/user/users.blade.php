@@ -13,8 +13,14 @@
 <form method="get" class="mb-6">
     <div class="flex gap-2">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari user..." class="px-4 py-2 border rounded-lg w-full max-w-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">Cari</button>
-        @if(request('search'))
+        <select name="limit" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer" onchange="this.form.submit()">
+            <option value="10" {{ request('limit') == 10 ? 'selected' : '' }}>10 Baris</option>
+            <option value="25" {{ request('limit') == 25 ? 'selected' : '' }}>25 Baris</option>
+            <option value="50" {{ request('limit') == 50 ? 'selected' : '' }}>50 Baris</option>
+            <option value="all" {{ request('limit') == 'all' ? 'selected' : '' }}>Semua</option>
+        </select>
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">Filter</button>
+        @if(request('search') || request('limit'))
         <a href="{{ route('users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 cursor-pointer">Reset</a>
         @endif
     </div>
@@ -69,5 +75,10 @@
             </tbody>
         </table>
     </div>
+    @if($users instanceof \Illuminate\Pagination\LengthAwarePaginator && $users->hasPages())
+    <div class="p-4 border-t border-gray-100">
+        {{ $users->links() }}
+    </div>
+    @endif
 </div>
 @endsection

@@ -47,6 +47,22 @@
                 }
             })
         }
+
+        // Sidebar Toggle Logic
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+        const sidebar = document.getElementById('sidebar');
+
+        if (mobileMenuBtn && sidebar) {
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.remove('-translate-x-full');
+            });
+        }
+        if (closeSidebarBtn && sidebar) {
+            closeSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+            });
+        }
     </script>
 </body>
 </html>

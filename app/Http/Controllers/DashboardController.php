@@ -53,7 +53,7 @@ class DashboardController extends Controller
             $end = Carbon::parse($endDate);
             $months = $start->diffInMonths($end);
 
-            $salesData = Order::selectRaw('MONTH(order_date) as month, SUM(total_price) as total')
+            $salesData = Order::selectRaw('MONTH(order_date) as month, SUM(total_price) as total, COUNT(*) as order_count')
                 ->whereBetween('order_date', [$startDate, $endDate])
                 ->where('status', 'completed')
                 ->groupBy('month')
@@ -61,17 +61,19 @@ class DashboardController extends Controller
 
             $labels = [];
             $data = [];
+            $orderData = [];
             for ($i = $months; $i >= 0; $i--) {
                 $month = $end->copy()->subMonths($i);
                 $monthNum = (int) $month->format('n');
                 $labels[] = strtolower($month->format('M'));
                 $order = $salesData->firstWhere('month', $monthNum);
                 $data[] = $order ? (float) $order->total : 0;
+                $orderData[] = $order ? (int) $order->order_count : 0;
             }
         } elseif ($period === 'yearly') {
             $totalSales = $query->sum('total_price');
 
-            $salesData = Order::selectRaw('YEAR(order_date) as year, SUM(total_price) as total')
+            $salesData = Order::selectRaw('YEAR(order_date) as year, SUM(total_price) as total, COUNT(*) as order_count')
                 ->where('status', 'completed')
                 ->groupBy('year')
                 ->get();
@@ -79,18 +81,20 @@ class DashboardController extends Controller
             $currentYear = Carbon::now()->year;
             $labels = [];
             $data = [];
+            $orderData = [];
             for ($i = 4; $i >= 0; $i--) {
                 $year = $currentYear - $i;
                 $labels[] = (string) $year;
                 $order = $salesData->firstWhere('year', $year);
                 $data[] = $order ? (float) $order->total : 0;
+                $orderData[] = $order ? (int) $order->order_count : 0;
             }
         } else {
             $sixMonthsAgo = Carbon::now()->subMonths(5);
             $query = Order::where('order_date', '>=', $sixMonthsAgo)->where('status', 'completed');
             $totalSales = $query->sum('total_price');
 
-            $salesData = Order::selectRaw('MONTH(order_date) as month, SUM(total_price) as total')
+            $salesData = Order::selectRaw('MONTH(order_date) as month, SUM(total_price) as total, COUNT(*) as order_count')
                 ->where('order_date', '>=', $sixMonthsAgo)
                 ->where('status', 'completed')
                 ->groupBy('month')
@@ -98,6 +102,7 @@ class DashboardController extends Controller
 
             $labels = [];
             $data = [];
+            $orderData = [];
             for ($i = 5; $i >= 0; $i--) {
                 $month = Carbon::now()->subMonths($i);
                 $monthNum = (int) $month->format('n');
@@ -105,12 +110,14 @@ class DashboardController extends Controller
                 $labels[] = strtolower($monthName);
                 $order = $salesData->firstWhere('month', $monthNum);
                 $data[] = $order ? (float) $order->total : 0;
+                $orderData[] = $order ? (int) $order->order_count : 0;
             }
         }
 
         $chartData = [
             'labels' => $labels,
             'data' => $data,
+            'orderData' => $orderData,
         ];
 
         $topSellingProducts = Order::with('product')

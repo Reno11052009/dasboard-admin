@@ -33,14 +33,7 @@
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 class="font-bold text-gray-700 mb-4">Product Sales</h3>
-        <div class="h-64">
-            <canvas id="productSalesChart"></canvas>
-        </div>
-    </div>
-
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-2">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
             <h3 class="font-bold text-gray-700">Sales Analytics</h3>
             <div class="flex flex-wrap items-center gap-3">
@@ -60,6 +53,20 @@
         </div>
         <div class="h-64">
             <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h3 class="font-bold text-gray-700 mb-4">Product Distribution</h3>
+        <div class="h-64">
+            <canvas id="productSalesChart"></canvas>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h3 class="font-bold text-gray-700 mb-4">Orders Analytics</h3>
+        <div class="h-64">
+            <canvas id="ordersChart"></canvas>
         </div>
     </div>
 </div>
@@ -100,7 +107,10 @@
     </div>
 
     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 class="font-bold text-gray-700 mb-4">Recent Sales</h3>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-700">Recent Sales</h3>
+            <a href="{{ route('orders') }}" class="text-sm text-indigo-600 hover:text-indigo-800 hover:underline font-medium">View All &rarr;</a>
+        </div>
         <div class="space-y-3">
             @forelse($recentSales as $sale)
             <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
@@ -141,6 +151,27 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } }
+        }
+    });
+
+    new Chart(document.getElementById('ordersChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($chartData['labels'] ?? []) !!},
+            datasets: [{
+                label: 'Orders',
+                data: {!! json_encode($chartData['orderData'] ?? []) !!},
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
         }
     });
 

@@ -17,15 +17,33 @@ class ProductController extends Controller
 
         $search = $request->get('search');
 
+        $limit = $request->get('limit', 10);
+        $category = $request->get('category');
+        
         $query = Product::query();
 
         if ($search) {
-            $query->where('name', 'like', "%$search%")
-                ->orWhere('category', 'like', "%$search%");
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('category', 'like', "%$search%");
+            });
         }
 
-        $products = $query->latest()->get();
-        return view('admin.product.product', compact('products'));
+        if ($category) {
+            $query->where('category', $category);
+        }
+
+        if ($limit === 'all') {
+            $perPage = $query->count() > 0 ? $query->count() : 1;
+        } else {
+            $perPage = (int) $limit;
+        }
+
+        $products = $query->latest()->paginate($perPage)->withQueryString();
+        
+        $categories = Product::select('category')->distinct()->whereNotNull('category')->where('category', '!=', '')->pluck('category');
+        
+        return view('admin.product.product', compact('products', 'categories'));
     }
 
     public function create()

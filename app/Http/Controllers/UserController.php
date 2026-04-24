@@ -15,6 +15,8 @@ class UserController extends Controller
 
         $search = $request->get('search');
 
+        $limit = $request->get('limit', 10);
+
         $query = User::query();
 
         if ($search) {
@@ -22,7 +24,13 @@ class UserController extends Controller
                 ->orWhere('email', 'like', "%$search%");
         }
 
-        $users = $query->latest()->get();
+        if ($limit === 'all') {
+            $perPage = $query->count() > 0 ? $query->count() : 1;
+        } else {
+            $perPage = (int) $limit;
+        }
+
+        $users = $query->latest()->paginate($perPage)->withQueryString();
         return view('admin.user.users', compact('users'));
     }
 
