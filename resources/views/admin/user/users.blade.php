@@ -13,16 +13,21 @@
 <form method="get" class="mb-6">
     <div class="flex gap-2">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari user..." class="px-4 py-2 border rounded-lg w-full max-w-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <select name="role" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer" onchange="this.form.submit()">
+            <option value="">Semua Role</option>
+            <option value="super_admin" {{ request('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+            <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+            <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
+        </select>
+        @if(request('search') || request('role') || request('limit'))
+        <a href="{{ route('users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 cursor-pointer">Reset</a>
+        @endif
         <select name="limit" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer" onchange="this.form.submit()">
             <option value="10" {{ request('limit') == 10 ? 'selected' : '' }}>10 Baris</option>
             <option value="25" {{ request('limit') == 25 ? 'selected' : '' }}>25 Baris</option>
             <option value="50" {{ request('limit') == 50 ? 'selected' : '' }}>50 Baris</option>
             <option value="all" {{ request('limit') == 'all' ? 'selected' : '' }}>Semua</option>
         </select>
-        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">Filter</button>
-        @if(request('search') || request('limit'))
-        <a href="{{ route('users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 cursor-pointer">Reset</a>
-        @endif
     </div>
 </form>
 
@@ -34,6 +39,7 @@
                     <th class="px-6 py-4 text-xs uppercase font-semibold text-gray-500">ID</th>
                     <th class="px-6 py-4 text-xs uppercase font-semibold text-gray-500">Nama</th>
                     <th class="px-6 py-4 text-xs uppercase font-semibold text-gray-500">Email</th>
+                    <th class="px-6 py-4 text-xs uppercase font-semibold text-gray-500">Role</th>
                     <th class="px-6 py-4 text-xs uppercase font-semibold text-gray-500 text-right">Aksi</th>
                 </tr>
             </thead>
@@ -50,6 +56,7 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->email }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">{{ $user->role }}</td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
                             <a href="{{ route('users.edit', $user->id) }}" class="p-1.5 bg-amber-50 text-amber-600 rounded-md hover:bg-amber-100 transition">

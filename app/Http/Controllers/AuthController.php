@@ -12,6 +12,9 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         if (Auth::check()) {
+            if (Auth::user()->role === 'user') {
+                return redirect()->route('welcome');
+            }
             return redirect()->route('index');
         }
         return view('login.login');
@@ -30,13 +33,13 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Email atau password salah'])->withInput();
         }
 
-        if (!in_array($user->role, ['super_admin', 'admin'])) {
-            return back()->withErrors(['email' => 'Anda tidak memiliki akses'])->withInput();
-        }
-
         Auth::login($user);
         $request->session()->regenerate();
         
+        if ($user->role === 'user') {
+            return redirect()->route('welcome');
+        }
+
         return redirect()->route('index');
     }
 

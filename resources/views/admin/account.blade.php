@@ -1,52 +1,44 @@
 @extends('admin.components.layout')
 
-@section('header', 'Add New User')
+@section('header', 'Manage Account')
 
 @section('content')
 <div class="max-w-2xl mx-auto">
-    <div class="mb-6">
-        <a href="{{ route('users') }}" class="text-sm text-indigo-600 hover:underline flex items-center gap-1">
-            ← Kembali ke Daftar User
-        </a>
-    </div>
-
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-8">
-            <form action="{{ route('users.store') }}" method="POST" class="space-y-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Informasi Akun</h2>
+            <form action="{{ route('account.update') }}" method="POST" class="space-y-6">
                 @csrf
+                @method('PUT')
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap</label>
-                    <input type="text" name="name" required value="{{ old('name') }}"
+                    <input type="text" name="name" required value="{{ old('name', $user->name) }}"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                         placeholder="Contoh: John Doe">
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                    <input type="email" name="email" required value="{{ old('email') }}"
+                    <input type="email" name="email" required value="{{ old('email', $user->email) }}"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                         placeholder="Contoh: john@example.com">
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Role</label>
-                    <select name="role" required
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition">
-                        <option value="">Pilih Role</option>
-                        <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
-                        <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                    </select>
+                    <input type="text" value="{{ ucfirst(str_replace('_', ' ', $user->role)) }}" disabled
+                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-gray-500 cursor-not-allowed outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Anda tidak dapat mengubah role Anda sendiri.</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Password Baru</label>
                     <div class="relative">
-                        <input type="password" name="password" id="password" required
+                        <input type="password" name="password" id="password"
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition pr-12"
-                            placeholder="Minimal 8 karakter">
-                        <button type="button" onclick="togglePassword('password', 'eye-icon-pass')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-indigo-600 focus:outline-none">
+                            placeholder="Kosongkan jika tidak ingin mengubah password">
+                        <button type="button" onclick="togglePassword('password', 'eye-icon-pass')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-indigo-600 focus:outline-none cursor-pointer">
                             <svg id="eye-icon-pass" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -56,12 +48,12 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Password</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Password Baru</label>
                     <div class="relative">
-                        <input type="password" name="password_confirmation" id="password_confirmation" required
+                        <input type="password" name="password_confirmation" id="password_confirmation"
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition pr-12"
                             placeholder="Masukkan password yang sama">
-                        <button type="button" onclick="togglePassword('password_confirmation', 'eye-icon-conf')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-indigo-600 focus:outline-none">
+                        <button type="button" onclick="togglePassword('password_confirmation', 'eye-icon-conf')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-indigo-600 focus:outline-none cursor-pointer">
                             <svg id="eye-icon-conf" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -73,12 +65,8 @@
                 <div class="pt-4 flex items-center gap-3">
                     <button type="submit"
                         class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-indigo-200 cursor-pointer">
-                        Simpan User
+                        Update Akun
                     </button>
-                    <a href="{{ route('users') }}"
-                        class="px-6 py-3 bg-gray-100 text-gray-600 font-semibold rounded-xl hover:bg-gray-200 transition">
-                        Batal
-                    </a>
                 </div>
             </form>
         </div>

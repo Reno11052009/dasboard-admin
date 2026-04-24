@@ -14,14 +14,20 @@ class UserController extends Controller
         }
 
         $search = $request->get('search');
-
+        $role = $request->get('role');
         $limit = $request->get('limit', 10);
 
         $query = User::query();
 
         if ($search) {
-            $query->where('name', 'like', "%$search%")
-                ->orWhere('email', 'like', "%$search%");
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%");
+            });
+        }
+
+        if ($role) {
+            $query->where('role', $role);
         }
 
         if ($limit === 'all') {
@@ -53,12 +59,14 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
+            'role' => 'required|in:admin,user,super_admin',
         ]);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
+            'role' => $request->role,
         ]);
 
         return redirect()->route('users')->with('success', 'User created successfully.');
@@ -86,10 +94,12 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|min:8|confirmed',
+            'role' => 'required|in:admin,user,super_admin',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
+        $user->role = $request->role;
 
         if ($request->password) {
             $user->password = $request->password;
@@ -110,5 +120,33 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users')->with('success', 'User deleted successfully.');
+    }
+
+    public function account()
+    {
+        $user = auth()->user();
+        return view('admin.account', compact('user'));
+    }
+
+    public function updateAccount(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:8|confirmed',
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = $request->password;
+        }
+
+        $user->save();
+
+        return redirect()->route('account')->with('success', 'Account updated successfully.');
     }
 }

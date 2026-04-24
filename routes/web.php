@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
+Route::get('/welcome', function () {
+    return view('welcome');
+})->name('welcome')->middleware('auth');
+
 Route::get('/admin', [DashboardController::class, 'index'])->name('index');
 
 Route::get('/admin/users', [UserController::class, 'index'])->name('users');
@@ -18,6 +22,9 @@ Route::post('/admin/users', [UserController::class, 'store'])->name('users.store
 Route::get('/admin/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
 Route::put('/admin/users/{id}', [UserController::class, 'update'])->name('users.update');
 Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])->name('users.delete');
+
+Route::get('/admin/account', [UserController::class, 'account'])->name('account');
+Route::put('/admin/account', [UserController::class, 'updateAccount'])->name('account.update');
 
 Route::get('/admin/products', [ProductController::class, 'index'])->name('products');
 Route::get('/admin/products/create', [ProductController::class, 'create'])->name('product.create');
