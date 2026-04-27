@@ -19,7 +19,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'role_id',
     ];
 
     /**
@@ -43,5 +43,34 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function hasPermission($permission)
+    {
+        // Fallback jika belum menjalankan migrate
+        if (is_string($this->role)) {
+            return $this->role === 'super_admin';
+        }
+
+        if (!$this->role || !is_array($this->role->permissions)) {
+            return false;
+        }
+        
+        return in_array($permission, $this->role->permissions);
+    }
+
+    public function isSuperAdmin()
+    {
+        // Fallback jika belum menjalankan migrate
+        if (is_string($this->role)) {
+            return $this->role === 'super_admin';
+        }
+
+        return $this->role && $this->role->name === 'Super Admin';
     }
 }

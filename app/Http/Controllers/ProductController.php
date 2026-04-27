@@ -11,8 +11,8 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.view'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $search = $request->get('search');
@@ -48,8 +48,8 @@ class ProductController extends Controller
 
     public function create()
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.create'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         return view('admin.product.create');
@@ -57,8 +57,8 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.create'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $request->validate([
@@ -93,8 +93,8 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.view'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $product = Product::findOrFail($id);
@@ -103,8 +103,8 @@ class ProductController extends Controller
 
     public function edit($id)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.edit'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $product = Product::findOrFail($id);
@@ -113,8 +113,8 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.edit'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $request->validate([
@@ -152,8 +152,8 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.delete'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $product = Product::findOrFail($id);

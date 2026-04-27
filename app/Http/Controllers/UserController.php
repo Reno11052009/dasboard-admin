@@ -9,15 +9,15 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->check() || auth()->user()->role !== 'super_admin') {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.view'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
         $search = $request->get('search');
-        $role = $request->get('role');
+        $role_id = $request->get('role_id');
         $limit = $request->get('limit', 10);
 
-        $query = User::query();
+        $query = User::with('role');
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -26,8 +26,8 @@ class UserController extends Controller
             });
         }
 
-        if ($role) {
-            $query->where('role', $role);
+        if ($role_id) {
+            $query->where('role_id', $role_id);
         }
 
         if ($limit === 'all') {
@@ -37,21 +37,23 @@ class UserController extends Controller
         }
 
         $users = $query->latest()->paginate($perPage)->withQueryString();
-        return view('admin.user.users', compact('users'));
+        $roles = \App\Models\Role::all();
+        return view('admin.user.users', compact('users', 'roles'));
     }
 
     public function create()
     {
-        if (!auth()->check() || auth()->user()->role !== 'super_admin') {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.create'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
-        return view('admin.user.create');
+        $roles = \App\Models\Role::all();
+        return view('admin.user.create', compact('roles'));
     }
 
     public function store(Request $request)
     {
-        if (!auth()->check() || auth()->user()->role !== 'super_admin') {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.create'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -59,14 +61,14 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
-            'role' => 'required|in:admin,user,super_admin',
+            'role_id' => 'required|exists:roles,id',
         ]);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
-            'role' => $request->role,
+            'role_id' => $request->role_id,
         ]);
 
         return redirect()->route('users')->with('success', 'User created successfully.');
@@ -74,17 +76,18 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        if (!auth()->check() || auth()->user()->role !== 'super_admin') {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.edit'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
         $user = User::findOrFail($id);
-        return view('admin.user.edit', compact('user'));
+        $roles = \App\Models\Role::all();
+        return view('admin.user.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, $id)
     {
-        if (!auth()->check() || auth()->user()->role !== 'super_admin') {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.edit'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -94,12 +97,12 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|min:8|confirmed',
-            'role' => 'required|in:admin,user,super_admin',
+            'role_id' => 'required|exists:roles,id',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->role = $request->role;
+        $user->role_id = $request->role_id;
 
         if ($request->password) {
             $user->password = $request->password;
@@ -112,7 +115,7 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        if (!auth()->check() || auth()->user()->role !== 'super_admin') {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.delete'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 

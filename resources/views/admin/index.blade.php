@@ -15,11 +15,6 @@
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center overflow-hidden flex flex-col justify-center">
         <p class="text-xl lg:text-2xl font-bold text-amber-600 truncate" title="{{ $orderCount }}">{{ $orderCount }}</p>
         <p class="text-xs lg:text-sm text-gray-500 truncate" title="Total Orders">Total Orders</p>
-        @if(isset($ordersChange))
-        <p class="text-xs truncate {{ $ordersChange >= 0 ? 'text-green-500' : 'text-red-500' }}">
-            {{ $ordersChange >= 0 ? '+' : '' }}{{ $ordersChange }}%
-        </p>
-        @endif
     </div>
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center overflow-hidden flex flex-col justify-center">
         <p class="text-xl lg:text-2xl font-bold text-emerald-600 truncate" title="{{ number_format($totalSales, 0, ',', '.') }}">{{ number_format($totalSales, 0, ',', '.') }}</p>

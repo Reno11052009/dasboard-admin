@@ -32,12 +32,12 @@
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Role</label>
-                    <select name="role" required
+                    <select name="role_id" required
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition">
                         <option value="">Pilih Role</option>
-                        <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
-                        <option value="super_admin" {{ $user->role == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                        @foreach($roles as $role)
+                            <option value="{{ $role->id }}" {{ $user->role_id == $role->id ? 'selected' : '' }}>{{ $role->name }}</option>
+                        @endforeach
                     </select>
                 </div>
 

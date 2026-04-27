@@ -13,11 +13,11 @@
 <form method="get" class="mb-6">
     <div class="flex gap-2">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari user..." class="px-4 py-2 border rounded-lg w-full max-w-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <select name="role" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer" onchange="this.form.submit()">
+        <select name="role_id" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer" onchange="this.form.submit()">
             <option value="">Semua Role</option>
-            <option value="super_admin" {{ request('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-            <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-            <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
+            @foreach($roles as $role)
+                <option value="{{ $role->id }}" {{ request('role_id') == $role->id ? 'selected' : '' }}>{{ $role->name }}</option>
+            @endforeach
         </select>
 
         <select name="limit" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer" onchange="this.form.submit()">
@@ -27,7 +27,7 @@
             <option value="all" {{ request('limit') == 'all' ? 'selected' : '' }}>Semua</option>
         </select>
 
-        @if(request('search') || request('role') || request('limit'))
+        @if(request('search') || request('role_id') || request('limit'))
         <a href="{{ route('users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 cursor-pointer">Reset</a>
         @endif
     </div>
@@ -58,7 +58,11 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->email }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">{{ $user->role }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                        <span class="px-2 py-1 text-xs font-medium rounded-lg {{ $user->role && $user->role->name == 'Super Admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
+                            {{ $user->role ? $user->role->name : 'No Role' }}
+                        </span>
+                    </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
                             <a href="{{ route('users.edit', $user->id) }}" class="p-1.5 bg-amber-50 text-amber-600 rounded-md hover:bg-amber-100 transition">

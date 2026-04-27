@@ -30,6 +30,14 @@ Route::get('/admin/users/{id}/edit', [UserController::class, 'edit'])->name('use
 Route::put('/admin/users/{id}', [UserController::class, 'update'])->name('users.update');
 Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])->name('users.delete');
 
+Route::get('/admin/roles', [App\Http\Controllers\RoleController::class, 'index'])->name('roles');
+Route::get('/admin/roles/create', [App\Http\Controllers\RoleController::class, 'create'])->name('roles.create');
+Route::post('/admin/roles', [App\Http\Controllers\RoleController::class, 'store'])->name('roles.store');
+Route::get('/admin/roles/{id}/edit', [App\Http\Controllers\RoleController::class, 'edit'])->name('roles.edit');
+Route::put('/admin/roles/{id}', [App\Http\Controllers\RoleController::class, 'update'])->name('roles.update');
+Route::delete('/admin/roles/{id}', [App\Http\Controllers\RoleController::class, 'destroy'])->name('roles.delete');
+
+
 Route::get('/admin/account', [UserController::class, 'account'])->name('account');
 Route::put('/admin/account', [UserController::class, 'updateAccount'])->name('account.update');
 

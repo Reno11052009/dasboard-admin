@@ -6,15 +6,24 @@
         </button>
     </div>
     <nav class="flex-1 mt-4 px-4 space-y-2">
+        {{-- main --}}
         <label class="text-xs uppercase text-slate-400 font-semibold leading-6">main</label>
         <a href="{{ route('index') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Dashboard</a>
         @auth
-        @if(Auth::user()->role === 'super_admin')
+        @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('user.view'))
         <a href="{{ route('users') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Users</a>
         @endif
+        @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('role.view'))
+        <a href="{{ route('roles') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Roles</a>
+        @endif
         @endauth
+        @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('product.view'))
         <a href="{{ route('products') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Products</a>
+        @endif
+        @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('order.view'))
         <a href="{{ route('orders') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Orders</a>
+        @endif
+        {{-- settings --}}
         <label class="text-xs uppercase text-slate-400 font-semibold leading-6">settings</label>
         <a href="{{ route('account') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-slate-700">Account</a>
         <form action="{{ route('logout') }}" method="POST">

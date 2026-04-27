@@ -9,8 +9,8 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order.view'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $status = $request->get('status');
@@ -38,8 +38,8 @@ class OrderController extends Controller
 
     public function edit($id)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order.edit'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $order = Order::with('user', 'product')->findOrFail($id);
@@ -48,8 +48,8 @@ class OrderController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order.edit'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $request->validate([
@@ -65,8 +65,8 @@ class OrderController extends Controller
 
     public function destroy($id)
     {
-        if (!auth()->check()) {
-            return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order.delete'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $order = Order::findOrFail($id);
