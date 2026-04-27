@@ -10,6 +10,14 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    public function markNotificationsRead()
+    {
+        if (auth()->check()) {
+            auth()->user()->unreadNotifications->markAsRead();
+        }
+        return response()->json(['success' => true]);
+    }
+
     public function index(Request $request)
     {
         if (!auth()->check()) {

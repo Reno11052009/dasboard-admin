@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\User;
+use App\Notifications\ProductApprovalRequest;
 use App\Notifications\ProductActionNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +23,11 @@ class ProductController extends Controller
         $category = $request->get('category');
         
         $query = Product::query();
+
+        // Filter status: if user has master access, they can see all, otherwise only approved
+        if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.master')) {
+            $query->where('status', 'approved');
+        }
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -77,6 +84,9 @@ class ProductController extends Controller
         $product->price = $request->price;
         $product->category = $request->category;
 
+        $isMaster = auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('product.master');
+        $product->status = $isMaster ? 'approved' : 'pending';
+
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
             $product->image = $imagePath;
@@ -84,11 +94,50 @@ class ProductController extends Controller
 
         $product->save();
 
-        if (auth()->check()) {
+        if ($isMaster) {
             auth()->user()->notify(new ProductActionNotification('create', $product->name));
+        } else {
+            // Find all users with product.master or super admins and notify them
+            $masterUsers = User::whereHas('role', function($q) {
+                $q->where('name', 'Super Admin')
+                  ->orWhereJsonContains('permissions', 'product.master')
+                  ->orWhereJsonContains('permissions', 'product master');
+            })->get();
+
+            // If super admins don't have role relation for some reason (fallback)
+            $legacySuperAdmins = User::where('role_id', null)->get()->filter->isSuperAdmin();
+            $allMasterUsers = $masterUsers->merge($legacySuperAdmins);
+
+            foreach ($allMasterUsers as $masterUser) {
+                $masterUser->notify(new ProductApprovalRequest($product, auth()->user()));
+            }
         }
 
-        return redirect()->route('products')->with('success', 'Product created successfully.');
+        $message = $isMaster ? 'Product created successfully.' : 'Product submitted and waiting for approval.';
+        return redirect()->route('products')->with('success', $message);
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.master'))) {
+            return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
+        }
+
+        $request->validate([
+            'status' => 'required|in:approved,rejected'
+        ]);
+
+        $product = Product::findOrFail($id);
+        $product->status = $request->status;
+        $product->save();
+
+        // Mark related notifications as read for all users
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('type', 'App\Notifications\ProductApprovalRequest')
+            ->where('data', 'like', '%"product_id":' . $id . '%')
+            ->update(['read_at' => now()]);
+
+        return redirect()->back()->with('success', 'Status produk berhasil diperbarui.');
     }
 
     public function show($id)

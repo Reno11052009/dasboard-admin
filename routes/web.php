@@ -22,6 +22,7 @@ Route::get('/clear-cache', function() {
 });
 
 Route::get('/admin', [DashboardController::class, 'index'])->name('index');
+Route::post('/admin/notifications/mark-read', [DashboardController::class, 'markNotificationsRead'])->name('notifications.markRead');
 
 Route::get('/admin/users', [UserController::class, 'index'])->name('users');
 Route::get('/admin/users/create', [UserController::class, 'create'])->name('users.create');
@@ -47,6 +48,7 @@ Route::get('/admin/products/{id}', [ProductController::class, 'show'])->name('pr
 Route::post('/admin/products', [ProductController::class, 'store'])->name('products.store');
 Route::get('/admin/products/{id}/edit', [ProductController::class, 'edit'])->name('product.edit');
 Route::put('/admin/products/{id}', [ProductController::class, 'update'])->name('product.update');
+Route::put('/admin/products/{id}/status', [ProductController::class, 'updateStatus'])->name('product.updateStatus');
 Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('product.delete');
 
 Route::get('/admin/orders', [OrderController::class, 'index'])->name('orders');

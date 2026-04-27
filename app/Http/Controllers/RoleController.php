@@ -9,7 +9,7 @@ class RoleController extends Controller
 {
     // Define all available permissions in the system
     private $availablePermissions = [
-        'product' => ['product.view', 'product.create', 'product.edit', 'product.delete'],
+        'product' => ['product.view', 'product.create', 'product.edit', 'product.delete', 'product.master'],
         'order'   => ['order.view', 'order.edit', 'order.delete'],
         'user'    => ['user.view', 'user.create', 'user.edit', 'user.delete'],
         'role'    => ['role.view', 'role.create', 'role.edit', 'role.delete'],
