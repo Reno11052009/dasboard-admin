@@ -10,17 +10,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-Route::get('/welcome', function () {
-    return view('welcome');
-})->name('welcome')->middleware('auth');
-
-Route::get('/clear-cache', function() {
-    \Illuminate\Support\Facades\Artisan::call('view:clear');
-    \Illuminate\Support\Facades\Artisan::call('route:clear');
-    \Illuminate\Support\Facades\Artisan::call('cache:clear');
-    return 'Cache berhasil dibersihkan! Silakan kembali ke halaman sebelumnya dan muat ulang (refresh).';
-});
-
 Route::get('/admin', [DashboardController::class, 'index'])->name('index');
 Route::post('/admin/notifications/mark-read', [DashboardController::class, 'markNotificationsRead'])->name('notifications.markRead');
 
