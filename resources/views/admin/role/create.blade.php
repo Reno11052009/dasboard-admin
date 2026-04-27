@@ -31,13 +31,20 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @php
+                            $rolePerms = [];
+                            if (session()->hasOldInput()) {
+                                $oldPerms = old('permissions', []);
+                                $rolePerms = is_array($oldPerms) ? $oldPerms : [];
+                            }
+                        @endphp
                         @foreach($availablePermissions as $group => $perms)
                         <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
                             <h3 class="font-bold text-gray-700 capitalize mb-3 border-b border-gray-200 pb-2">Manajemen {{ $group }}</h3>
                             <div class="space-y-3">
                                 @foreach($perms as $perm)
                                 <label class="flex items-center gap-3 cursor-pointer group">
-                                    <input type="checkbox" name="permissions[]" value="{{ $perm }}" class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                    <input type="checkbox" name="permissions[]" value="{{ $perm }}" {{ in_array($perm, $rolePerms) ? 'checked' : '' }} class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                                     <span class="text-gray-600 group-hover:text-gray-900 transition">{{ $perm }}</span>
                                 </label>
                                 @endforeach

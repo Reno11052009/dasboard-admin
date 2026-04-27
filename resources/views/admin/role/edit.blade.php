@@ -45,9 +45,29 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @php
-                            $rolePerms = is_array($role->permissions) ? $role->permissions : [];
+                            if (session()->hasOldInput()) {
+                                $oldPerms = old('permissions');
+                                $rolePerms = is_array($oldPerms) ? $oldPerms : [];
+                            } else {
+                                $rawPerms = $role->permissions;
+                                $decoded = $rawPerms;
+                                
+                                // Recursively decode if it was saved as a double-encoded string
+                                while(is_string($decoded)) {
+                                    $temp = json_decode($decoded, true);
+                                    if ($temp === null && json_last_error() !== JSON_ERROR_NONE) {
+                                        // Not valid JSON anymore, stop here
+                                        break; 
+                                    }
+                                    $decoded = $temp;
+                                }
+                                
+                                $rolePerms = is_array($decoded) ? $decoded : [];
+                            }
                         @endphp
                         
+                        <!-- DEBUG INFO: Tipe Data = {{ gettype($role->permissions) }}, Isi = {{ is_string($role->permissions) ? $role->permissions : json_encode($role->permissions) }} -->
+
                         @foreach($availablePermissions as $group => $perms)
                         <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 {{ $role->name === 'Super Admin' ? 'opacity-50 pointer-events-none' : '' }}">
                             <h3 class="font-bold text-gray-700 capitalize mb-3 border-b border-gray-200 pb-2">Manajemen {{ $group }}</h3>
@@ -55,7 +75,7 @@
                                 @foreach($perms as $perm)
                                 <label class="flex items-center gap-3 cursor-pointer group">
                                     <input type="checkbox" name="permissions[]" value="{{ $perm }}" 
-                                        {{ in_array($perm, $rolePerms) || $role->name === 'Super Admin' ? 'checked' : '' }}
+                                        {{ in_array($perm, $rolePerms) || in_array(str_replace('.', ' ', $perm), $rolePerms) || $role->name === 'Super Admin' ? 'checked' : '' }}
                                         class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                                     <span class="text-gray-600 group-hover:text-gray-900 transition">{{ $perm }}</span>
                                 </label>

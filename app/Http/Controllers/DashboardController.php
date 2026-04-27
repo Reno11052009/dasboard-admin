@@ -53,7 +53,13 @@ class DashboardController extends Controller
             $end = Carbon::parse($endDate);
             $months = $start->diffInMonths($end);
 
-            $salesData = Order::selectRaw('MONTH(order_date) as month, SUM(total_price) as total, COUNT(*) as order_count')
+            $salesData = Order::selectRaw('MONTH(order_date) as month, SUM(total_price) as total')
+                ->whereBetween('order_date', [$startDate, $endDate])
+                ->where('status', 'completed')
+                ->groupBy('month')
+                ->get();
+
+            $ordersCountData = Order::selectRaw('MONTH(order_date) as month, COUNT(*) as order_count')
                 ->whereBetween('order_date', [$startDate, $endDate])
                 ->where('status', 'completed')
                 ->groupBy('month')
@@ -66,14 +72,22 @@ class DashboardController extends Controller
                 $month = $end->copy()->subMonths($i);
                 $monthNum = (int) $month->format('n');
                 $labels[] = strtolower($month->format('M'));
-                $order = $salesData->firstWhere('month', $monthNum);
-                $data[] = $order ? (float) $order->total : 0;
+                
+                $sale = $salesData->firstWhere('month', $monthNum);
+                $order = $ordersCountData->firstWhere('month', $monthNum);
+                
+                $data[] = $sale ? (float) $sale->total : 0;
                 $orderData[] = $order ? (int) $order->order_count : 0;
             }
         } elseif ($period === 'yearly') {
             $totalSales = $query->sum('total_price');
 
-            $salesData = Order::selectRaw('YEAR(order_date) as year, SUM(total_price) as total, COUNT(*) as order_count')
+            $salesData = Order::selectRaw('YEAR(order_date) as year, SUM(total_price) as total')
+                ->where('status', 'completed')
+                ->groupBy('year')
+                ->get();
+
+            $ordersCountData = Order::selectRaw('YEAR(order_date) as year, COUNT(*) as order_count')
                 ->where('status', 'completed')
                 ->groupBy('year')
                 ->get();
@@ -85,8 +99,11 @@ class DashboardController extends Controller
             for ($i = 4; $i >= 0; $i--) {
                 $year = $currentYear - $i;
                 $labels[] = (string) $year;
-                $order = $salesData->firstWhere('year', $year);
-                $data[] = $order ? (float) $order->total : 0;
+                
+                $sale = $salesData->firstWhere('year', $year);
+                $order = $ordersCountData->firstWhere('year', $year);
+                
+                $data[] = $sale ? (float) $sale->total : 0;
                 $orderData[] = $order ? (int) $order->order_count : 0;
             }
         } else {
@@ -94,7 +111,13 @@ class DashboardController extends Controller
             $query = Order::where('order_date', '>=', $sixMonthsAgo)->where('status', 'completed');
             $totalSales = $query->sum('total_price');
 
-            $salesData = Order::selectRaw('MONTH(order_date) as month, SUM(total_price) as total, COUNT(*) as order_count')
+            $salesData = Order::selectRaw('MONTH(order_date) as month, SUM(total_price) as total')
+                ->where('order_date', '>=', $sixMonthsAgo)
+                ->where('status', 'completed')
+                ->groupBy('month')
+                ->get();
+
+            $ordersCountData = Order::selectRaw('MONTH(order_date) as month, COUNT(*) as order_count')
                 ->where('order_date', '>=', $sixMonthsAgo)
                 ->where('status', 'completed')
                 ->groupBy('month')
@@ -108,8 +131,11 @@ class DashboardController extends Controller
                 $monthNum = (int) $month->format('n');
                 $monthName = $month->format('M');
                 $labels[] = strtolower($monthName);
-                $order = $salesData->firstWhere('month', $monthNum);
-                $data[] = $order ? (float) $order->total : 0;
+                
+                $sale = $salesData->firstWhere('month', $monthNum);
+                $order = $ordersCountData->firstWhere('month', $monthNum);
+                
+                $data[] = $sale ? (float) $sale->total : 0;
                 $orderData[] = $order ? (int) $order->order_count : 0;
             }
         }
@@ -141,7 +167,6 @@ class DashboardController extends Controller
             ->selectRaw('product_id, SUM(quantity) as total_qty')
             ->groupBy('product_id')
             ->orderByDesc('total_qty')
-            ->limit(5)
             ->get();
 
         $totalQty = $productSales->sum('total_qty');

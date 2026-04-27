@@ -61,7 +61,8 @@ class User extends Authenticatable
             return false;
         }
         
-        return in_array($permission, $this->role->permissions);
+        $permWithSpace = str_replace('.', ' ', $permission);
+        return in_array($permission, $this->role->permissions) || in_array($permWithSpace, $this->role->permissions);
     }
 
     public function isSuperAdmin()

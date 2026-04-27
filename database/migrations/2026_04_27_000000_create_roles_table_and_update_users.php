@@ -22,7 +22,7 @@ return new class extends Migration
 
         // 2. Insert default roles
         $allPermissions = json_encode([
-            'product view', 'product create', 'product edit', 'product delete',
+            'product view', 'product create', 'product edit', 'product delete', "master product",
             'order view', 'order edit', 'order delete',
             'user view', 'user create', 'user edit', 'user delete',
             'role view', 'role create', 'role edit', 'role delete'
