@@ -25,9 +25,7 @@
         <div id="notificationDropdown" class="hidden absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 transform origin-top-right transition-all">
             <div class="px-4 py-3 border-b border-gray-50 flex justify-between items-center bg-gray-50/80 backdrop-blur-sm">
                 <h3 class="text-sm font-bold text-gray-800">Notifikasi</h3>
-                @if($unreadCount > 0)
-                <button onclick="markAllAsRead()" class="text-xs text-indigo-600 hover:text-indigo-800 cursor-pointer font-medium transition-colors focus:outline-none">Tandai semua dibaca</button>
-                @endif
+                <button id="markAllReadHeaderBtn" onclick="markAllAsRead()" class="text-xs text-indigo-600 hover:text-indigo-800 cursor-pointer font-medium transition-colors focus:outline-none {{ $unreadCount > 0 ? '' : 'hidden' }}">Tandai semua dibaca</button>
             </div>
             <div class="max-h-80 overflow-y-auto divide-y divide-gray-50">
                 @forelse($notifications as $notification)
@@ -37,7 +35,7 @@
                             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm text-gray-800 font-semibold">{{ $notification->data['type'] === 'product_approval' ? 'Persetujuan Produk' : 'Notifikasi' }}</p>
+                            <p class="text-sm text-gray-800 font-semibold">{{ $notification->data['type'] === 'product_approval' ? 'Persetujuan Produk' : ($notification->data['type'] === 'product_status_updated' ? 'Status Produk' : 'Notifikasi') }}</p>
                             <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">{{ $notification->data['message'] ?? 'Ada aktivitas baru.' }}</p>
                             <p class="text-[10px] font-medium text-indigo-500 mt-1.5">{{ $notification->created_at->diffForHumans() }}</p>
                         </div>
@@ -50,11 +48,9 @@
                 </div>
                 @endforelse
             </div>
-            @if($unreadCount > 0)
-            <div class="px-4 py-3 border-t border-gray-50 text-center bg-gray-50/50 hover:bg-gray-100 transition cursor-pointer" onclick="openNotifModal()">
+            <div id="detailNotifBtn" class="px-4 py-3 border-t border-gray-50 text-center bg-gray-50/50 hover:bg-gray-100 transition cursor-pointer {{ $unreadCount > 0 ? '' : 'hidden' }}" onclick="openNotifModal()">
                 <button class="text-xs font-bold text-indigo-600 focus:outline-none">Lihat Detail Notif</button>
             </div>
-            @endif
         </div>
 
         <span class="text-sm font-medium text-gray-600 ml-2 pl-2 border-l border-gray-200">Hi, {{ explode(' ', Auth::user()->name)[0] }}</span>
@@ -94,7 +90,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex justify-between items-start mb-1.5">
-                                        <h4 class="text-sm font-bold text-gray-800">{{ $notification->data['type'] === 'product_approval' ? 'Persetujuan Produk' : 'Pemberitahuan Sistem' }}</h4>
+                                        <h4 class="text-sm font-bold text-gray-800">{{ $notification->data['type'] === 'product_approval' ? 'Persetujuan Produk' : ($notification->data['type'] === 'product_status_updated' ? 'Status Produk' : 'Pemberitahuan Sistem') }}</h4>
                                         <span class="text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">{{ $notification->created_at->diffForHumans() }}</span>
                                     </div>
                                     <p class="text-sm text-gray-600 leading-relaxed">{{ $notification->data['message'] ?? 'Ada aktivitas baru yang memerlukan perhatian Anda.' }}</p>
@@ -123,9 +119,7 @@
             <!-- Modal Footer -->
             <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/80 rounded-b-2xl">
                 <button onclick="closeNotifModal()" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none transition cursor-pointer">Tutup</button>
-                @if($unreadCount > 0)
-                <button onclick="markAllAsRead()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 focus:outline-none transition cursor-pointer shadow-sm">Tandai Semua Dibaca</button>
-                @endif
+                <button id="markAllReadFooterBtn" onclick="markAllAsRead()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 focus:outline-none transition cursor-pointer shadow-sm {{ $unreadCount > 0 ? '' : 'hidden' }}">Tandai Semua Dibaca</button>
             </div>
         </div>
     </div>
@@ -148,7 +142,7 @@
         }
     }
 
-        function markAllAsRead() {
+    function markAllAsRead() {
         fetch('{{ route("notifications.markRead") }}', {
             method: 'POST',
             headers: {
@@ -163,6 +157,121 @@
                   window.location.reload();
               }
           });
+    }
+
+    function fetchNotifications() {
+        fetch('{{ route("notifications.unread") }}', {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateNotificationUI(data.count, data.notifications);
+        })
+        .catch(error => console.error('Error fetching notifications:', error));
+    }
+
+    function updateNotificationUI(count, notifications) {
+        let badge = document.getElementById('notifBadge');
+        if (count > 0) {
+            if (!badge) {
+                const notifBtn = document.getElementById('notificationBtn');
+                if (notifBtn) {
+                    badge = document.createElement('span');
+                    badge.id = 'notifBadge';
+                    badge.className = 'absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full border-2 border-white';
+                    notifBtn.appendChild(badge);
+                }
+            }
+            if (badge) badge.innerText = count;
+        } else {
+            if (badge) badge.remove();
+        }
+
+        const dropdownList = document.querySelector('#notificationDropdown .max-h-80');
+        if (dropdownList) {
+            if (count > 0) {
+                dropdownList.innerHTML = notifications.map(notif => `
+                    <a href="${notif.data.url ?? '#'}" class="block px-4 py-3 hover:bg-gray-50 transition bg-indigo-50/30">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-800 font-semibold">${notif.data.type === 'product_approval' ? 'Persetujuan Produk' : (notif.data.type === 'product_status_updated' ? 'Status Produk' : 'Notifikasi')}</p>
+                                <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">${notif.data.message ?? 'Ada aktivitas baru.'}</p>
+                                <p class="text-[10px] font-medium text-indigo-500 mt-1.5">${notif.created_at}</p>
+                            </div>
+                            <div class="w-2 h-2 bg-indigo-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                dropdownList.innerHTML = `
+                    <div class="px-4 py-6 text-center text-sm text-gray-500">
+                        Tidak ada notifikasi baru
+                    </div>
+                `;
+            }
+        }
+
+        const modalList = document.querySelector('#notifModal .overflow-y-auto');
+        if (modalList) {
+            if (count > 0) {
+                modalList.innerHTML = `
+                    <div class="space-y-4">
+                        ${notifications.map(notif => `
+                        <div class="p-5 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-white hover:shadow-sm transition duration-200">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start mb-1.5">
+                                        <h4 class="text-sm font-bold text-gray-800">${notif.data.type === 'product_approval' ? 'Persetujuan Produk' : (notif.data.type === 'product_status_updated' ? 'Status Produk' : 'Pemberitahuan Sistem')}</h4>
+                                        <span class="text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">${notif.created_at}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 leading-relaxed">${notif.data.message ?? 'Ada aktivitas baru yang memerlukan perhatian Anda.'}</p>
+                                    ${notif.data.url ? `
+                                    <div class="mt-4">
+                                        <a href="${notif.data.url}" class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors">
+                                            Tindak Lanjuti <svg class="w-3.5 h-3.5 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                        </a>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                modalList.innerHTML = `
+                    <div class="py-12 text-center">
+                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+                        </div>
+                        <p class="text-gray-500 font-medium text-sm">Tidak ada notifikasi baru saat ini.</p>
+                    </div>
+                `;
+            }
+        }
+
+        const headerBtn = document.getElementById('markAllReadHeaderBtn');
+        const detailBtn = document.getElementById('detailNotifBtn');
+        const footerBtn = document.getElementById('markAllReadFooterBtn');
+
+        if (count > 0) {
+            if (headerBtn) headerBtn.classList.remove('hidden');
+            if (detailBtn) detailBtn.classList.remove('hidden');
+            if (footerBtn) footerBtn.classList.remove('hidden');
+        } else {
+            if (headerBtn) headerBtn.classList.add('hidden');
+            if (detailBtn) detailBtn.classList.add('hidden');
+            if (footerBtn) footerBtn.classList.add('hidden');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -181,5 +290,8 @@
                 }
             });
         }
+
+        // Fetch notifications every 5 seconds
+        setInterval(fetchNotifications, 5000);
     });
 </script>

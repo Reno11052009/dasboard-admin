@@ -18,6 +18,27 @@ class DashboardController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function getUnreadNotifications()
+    {
+        if (!auth()->check()) {
+            return response()->json(['count' => 0, 'notifications' => []]);
+        }
+
+        $notifications = auth()->user()->unreadNotifications;
+        $formatted = $notifications->map(function ($notif) {
+            return [
+                'id' => $notif->id,
+                'data' => $notif->data,
+                'created_at' => $notif->created_at->diffForHumans(),
+            ];
+        });
+
+        return response()->json([
+            'count' => $notifications->count(),
+            'notifications' => $formatted
+        ]);
+    }
+
     public function index(Request $request)
     {
         if (!auth()->check()) {

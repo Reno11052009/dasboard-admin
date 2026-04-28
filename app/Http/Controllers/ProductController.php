@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\User;
+use App\Models\InventoryAdjustment;
 use App\Notifications\ProductApprovalRequest;
 use App\Notifications\ProductActionNotification;
+use App\Notifications\ProductStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,9 +26,12 @@ class ProductController extends Controller
         
         $query = Product::query();
 
-        // Filter status: if user has master access, they can see all, otherwise only approved
+        // Filter status: if user has master access, they can see all, otherwise only approved or their own products
         if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.master')) {
-            $query->where('status', 'approved');
+            $query->where(function($q) {
+                $q->where('status', 'approved')
+                  ->orWhere('user_id', auth()->id());
+            });
         }
 
         if ($search) {
@@ -78,6 +83,7 @@ class ProductController extends Controller
         ]);
 
         $product = new Product();
+        $product->user_id = auth()->id();
         $product->name = $request->name;
         $product->description = $request->description;
         $product->stok = $request->stok;
@@ -93,6 +99,16 @@ class ProductController extends Controller
         }
 
         $product->save();
+
+        // Create initial inventory adjustment record
+        InventoryAdjustment::create([
+            'product_id' => $product->id,
+            'user_id' => auth()->id(),
+            'action' => 'created',
+            'stok' => $product->stok,
+            'harga' => $product->price,
+            'note' => 'Penambahan produk baru'
+        ]);
 
         if ($isMaster) {
             auth()->user()->notify(new ProductActionNotification('create', $product->name));
@@ -131,6 +147,13 @@ class ProductController extends Controller
         $product->status = $request->status;
         $product->save();
 
+        if ($product->user_id) {
+            $creator = User::find($product->user_id);
+            if ($creator) {
+                $creator->notify(new ProductStatusUpdated($product, $request->status));
+            }
+        }
+
         // Mark related notifications as read for all users
         \Illuminate\Support\Facades\DB::table('notifications')
             ->where('type', 'App\Notifications\ProductApprovalRequest')
@@ -147,7 +170,8 @@ class ProductController extends Controller
         }
 
         $product = Product::findOrFail($id);
-        return view('admin.product.show', compact('product'));
+        $adjustments = \App\Models\InventoryAdjustment::with('user')->where('product_id', $product->id)->latest()->get();
+        return view('admin.product.show', compact('product', 'adjustments'));
     }
 
     public function edit($id)
@@ -176,9 +200,17 @@ class ProductController extends Controller
         ]);
 
         $product = Product::findOrFail($id);
+        $oldStok = $product->stok;
+        $oldData = $product->getOriginal();
+
         $product->name = $request->name;
         $product->description = $request->description;
+        
+        // Calculate stock difference
+        $stokDifference = $request->stok - $oldStok;
+        // We set the new stock, but conceptually it matches the sum of history
         $product->stok = $request->stok;
+        
         $product->price = $request->price;
         $product->category = $request->category;
 
@@ -191,6 +223,20 @@ class ProductController extends Controller
         }
 
         $product->save();
+
+        $reason = $request->input('edit_reason') ?: 'Perubahan detail produk atau stok';
+
+        $hargaDifference = $request->price - $product->getOriginal('price');
+
+        // Record adjustment and edit history
+        InventoryAdjustment::create([
+            'product_id' => $product->id,
+            'user_id' => auth()->id(),
+            'action' => 'updated',
+            'stok' => $stokDifference,
+            'harga' => $hargaDifference,
+            'note' => $reason
+        ]);
 
         if (auth()->check()) {
             auth()->user()->notify(new ProductActionNotification('update', $product->name));
@@ -206,6 +252,17 @@ class ProductController extends Controller
         }
 
         $product = Product::findOrFail($id);
+        
+        // Catat di history sebelum dihapus
+        InventoryAdjustment::create([
+            'product_id' => null,
+            'user_id' => auth()->id(),
+            'action' => 'deleted',
+            'stok' => 0,
+            'harga' => 0,
+            'note' => 'Produk dihapus: ' . $product->name
+        ]);
+
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }

@@ -5,6 +5,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\InventoryAdjustmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
@@ -12,6 +14,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::get('/admin', [DashboardController::class, 'index'])->name('index');
 Route::post('/admin/notifications/mark-read', [DashboardController::class, 'markNotificationsRead'])->name('notifications.markRead');
+Route::get('/admin/notifications/unread', [DashboardController::class, 'getUnreadNotifications'])->name('notifications.unread');
 
 Route::get('/admin/users', [UserController::class, 'index'])->name('users');
 Route::get('/admin/users/create', [UserController::class, 'create'])->name('users.create');
@@ -20,12 +23,12 @@ Route::get('/admin/users/{id}/edit', [UserController::class, 'edit'])->name('use
 Route::put('/admin/users/{id}', [UserController::class, 'update'])->name('users.update');
 Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])->name('users.delete');
 
-Route::get('/admin/roles', [App\Http\Controllers\RoleController::class, 'index'])->name('roles');
-Route::get('/admin/roles/create', [App\Http\Controllers\RoleController::class, 'create'])->name('roles.create');
-Route::post('/admin/roles', [App\Http\Controllers\RoleController::class, 'store'])->name('roles.store');
-Route::get('/admin/roles/{id}/edit', [App\Http\Controllers\RoleController::class, 'edit'])->name('roles.edit');
-Route::put('/admin/roles/{id}', [App\Http\Controllers\RoleController::class, 'update'])->name('roles.update');
-Route::delete('/admin/roles/{id}', [App\Http\Controllers\RoleController::class, 'destroy'])->name('roles.delete');
+Route::get('/admin/roles', [RoleController::class, 'index'])->name('roles');
+Route::get('/admin/roles/create', [RoleController::class, 'create'])->name('roles.create');
+Route::post('/admin/roles', [RoleController::class, 'store'])->name('roles.store');
+Route::get('/admin/roles/{id}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+Route::put('/admin/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
+Route::delete('/admin/roles/{id}', [RoleController::class, 'destroy'])->name('roles.delete');
 
 
 Route::get('/admin/account', [UserController::class, 'account'])->name('account');
@@ -39,6 +42,10 @@ Route::get('/admin/products/{id}/edit', [ProductController::class, 'edit'])->nam
 Route::put('/admin/products/{id}', [ProductController::class, 'update'])->name('product.update');
 Route::put('/admin/products/{id}/status', [ProductController::class, 'updateStatus'])->name('product.updateStatus');
 Route::delete('/admin/products/{id}', [ProductController::class, 'destroy'])->name('product.delete');
+
+Route::get('/admin/inventory-adjustments', [InventoryAdjustmentController::class, 'index'])->name('inventory.index');
+Route::get('/admin/inventory-adjustments/product/{id}/edit', [InventoryAdjustmentController::class, 'editProduct'])->name('inventory.product.edit');
+Route::put('/admin/inventory-adjustments/product/{id}', [InventoryAdjustmentController::class, 'updateProduct'])->name('inventory.product.update');
 
 Route::get('/admin/orders', [OrderController::class, 'index'])->name('orders');
 Route::get('/admin/orders/{id}/edit', [OrderController::class, 'edit'])->name('orders.edit');

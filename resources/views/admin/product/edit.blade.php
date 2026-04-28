@@ -43,6 +43,7 @@
                     <input type="text" name="category" value="{{ $product->category }}"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none transition"
                         placeholder="Contoh: Akses Premium, E-book, dll.">
+                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -66,6 +67,14 @@
                                 class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none transition">
                         </div>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Alasan Edit (Opsional)</label>
+                    <textarea name="edit_reason" rows="2"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                        placeholder="Tuliskan alasan mengapa Anda mengedit produk atau stok ini..."></textarea>
+                    <p class="text-[11px] text-gray-400 mt-1">Alasan ini akan dicatat di dalam histori Inventory Adjustment.</p>
                 </div>
 
                 <div class="pt-4 flex items-center gap-3">
