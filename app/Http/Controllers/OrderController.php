@@ -9,7 +9,7 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order.view'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order view'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -38,7 +38,7 @@ class OrderController extends Controller
 
     public function edit($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order edit'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -48,7 +48,7 @@ class OrderController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order edit'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -65,7 +65,7 @@ class OrderController extends Controller
 
     public function destroy($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order.delete'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('order delete'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 

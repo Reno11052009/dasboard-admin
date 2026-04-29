@@ -5,7 +5,7 @@
 @section('content')
 <div class="flex justify-between items-center mb-6">
     <h2 class="text-xl font-bold text-gray-800">Daftar Produk</h2>
-    @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('product.create'))
+    @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('product create'))
     <a href="/admin/products/create" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm transition cursor-pointer">
         + Produk Baru
     </a>
@@ -40,7 +40,7 @@
                 <tr>
                     <th class="px-6 py-4 text-xs font-semibold text-gray-500 min-w-[100px]">GAMBAR</th>
                     <th class="px-6 py-4 text-xs font-semibold text-gray-500 min-w-[200px]">NAMA PRODUK</th>
-                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 min-w-[100px]">STATUS</th>
+                    {{-- <th class="px-6 py-4 text-xs font-semibold text-gray-500 min-w-[100px]">STATUS</th> --}}
                     <th class="px-6 py-4 text-xs font-semibold text-gray-500 min-w-[150px]">KATEGORI</th>
                     <th class="px-6 py-4 text-xs font-semibold text-gray-500 min-w-[100px]">STOK</th>
                     <th class="px-6 py-4 text-xs font-semibold text-gray-500 min-w-[150px]">HARGA</th>
@@ -67,7 +67,8 @@
                             <div class="text-[10px] text-red-500 mt-1">Ditolak</div>
                         @endif
                     </td>
-                    <td class="px-6 py-4">
+                    {{-- status produk --}}
+                    {{-- <td class="px-6 py-4">
                         @if($product->status == 'approved')
                         <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-bold">Approved</span>
                         @elseif($product->status == 'pending')
@@ -75,7 +76,7 @@
                         @else
                         <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-bold">Rejected</span>
                         @endif
-                    </td>
+                    </td> --}}
                     <td class="px-6 py-4">{{ $product->category ?? 'Tidak ada kategori' }}</td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 {{ $product->stok < 10 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }} rounded text-xs font-bold whitespace-nowrap">
@@ -89,7 +90,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             </a>
 
-                            @if((Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('product.master')) && $product->status == 'pending')
+                            @if((Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('product master')) && $product->status == 'pending')
                             <form action="{{ route('product.updateStatus', $product->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('PUT')
@@ -107,12 +108,12 @@
                                 </button>
                             </form>
                             @endif
-                            {{-- @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('product.edit'))
+                            {{-- @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('product edit'))
                             <a href="{{ route('product.edit', $product->id) }}" class="p-1.5 bg-amber-50 text-amber-600 rounded-md hover:bg-amber-100 transition cursor-pointer" title="Edit">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </a>
                             @endif --}}
-                            @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('product.delete'))
+                            @if(Auth::user()->isSuperAdmin() || Auth::user()->hasPermission('product delete'))
                             <form action="{{ route('product.delete', $product->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')

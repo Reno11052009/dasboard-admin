@@ -8,14 +8,14 @@
         <h2 class="text-xl font-bold text-gray-800">Inventory Adjustments</h2>
         <div class="flex gap-2">
             <form action="{{ route('inventory.index') }}" method="GET" class="flex gap-2 w-full md:w-auto">
-                <select name="action" class="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 outline-none transition">
+                {{-- <select name="action" class="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 outline-none transition">
                     <option value="all" {{ request('action') == 'all' ? 'selected' : '' }}>Semua Aksi</option>
                     <option value="created" {{ request('action') == 'created' ? 'selected' : '' }}>Dibuat</option>
                     <option value="updated" {{ request('action') == 'updated' ? 'selected' : '' }}>Diedit</option>
                     <option value="deleted" {{ request('action') == 'deleted' ? 'selected' : '' }}>Dihapus</option>
                     <option value="adjustment" {{ request('action') == 'adjustment' ? 'selected' : '' }}>Penyesuaian</option>
                     <option value="order" {{ request('action') == 'order' ? 'selected' : '' }}>Terjual</option>
-                </select>
+                </select> --}}
                 <div class="relative w-full md:w-64">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
@@ -58,9 +58,9 @@
                     <td class="px-6 py-4">{{ $adj->created_at->format('d M Y H:i:s') }}</td>
                     <td class="px-6 py-4">
                         @if($adj->product)
-                            <a href="{{ route('product.show', $adj->product->id) }}" class="font-bold text-indigo-600 hover:text-indigo-800 hover:underline">{{ $adj->product->name }}</a>
+                            <span class="font-medium text-gray-800">{{ $adj->product->name }}</span>
                         @else
-                            <span class="text-gray-400 font-italic">Produk Dihapus</span>
+                            <span class="text-gray-400 italic">Produk Dihapus</span>
                         @endif
                     </td>
                     <td class="px-6 py-4 font-medium">{{ $adj->user ? $adj->user->name : 'Sistem' }}</td>
@@ -87,16 +87,42 @@
                                 <div class="mb-1"><span class="font-bold text-gray-700">Stok:</span> <span class="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">{{ $adj->stok }}</span></div>
                             @endif
 
-                            @if($adj->harga > 0)
-                                <div class="mb-1"><span class="font-bold text-gray-700">Harga:</span> <span class="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded">+ Rp {{ number_format($adj->harga, 0, ',', '.') }}</span></div>
-                            @elseif($adj->harga < 0)
-                                <div class="mb-1"><span class="font-bold text-gray-700">Harga:</span> <span class="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">- Rp {{ number_format(abs($adj->harga), 0, ',', '.') }}</span></div>
+                            @if($adj->harga_old !== null)
+                                @if($adj->harga_old != $adj->harga_new)
+                                    <div class="mb-1">
+                                        <span class="font-bold text-gray-700">Harga:</span>
+                                        <span class="text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded text-xs">
+                                            Rp {{ number_format($adj->harga_old, 0, ',', '.') }} ➔ Rp {{ number_format($adj->harga_new, 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                @endif
+                            @else
+                                @if($adj->harga_new > 0)
+                                    <div class="mb-1"><span class="font-bold text-gray-700">Harga:</span> <span class="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded">+ Rp {{ number_format($adj->harga_new, 0, ',', '.') }}</span></div>
+                                @elseif($adj->harga_new < 0)
+                                    <div class="mb-1"><span class="font-bold text-gray-700">Harga:</span> <span class="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">- Rp {{ number_format(abs($adj->harga_new), 0, ',', '.') }}</span></div>
+                                @endif
                             @endif
 
-                            @if($adj->stok == 0 && $adj->harga == 0)
-                                <span class="text-gray-400">Tidak ada perubahan stok/harga</span>
+                            @if($adj->changed_fields)
+                                @foreach(explode(',', $adj->changed_fields) as $field)
+                                    <div class="mb-1">
+                                        <span class="font-bold text-gray-700">{{ ucfirst(trim($field)) }}:</span>
+                                        <span class="text-purple-600 font-bold bg-purple-50 px-2 py-0.5 rounded">diubah</span>
+                                    </div>
+                                @endforeach
+                            @endif
+
+                            @php
+                                $noStokChange = $adj->stok == 0;
+                                $noHargaChange = ($adj->harga_old !== null && $adj->harga_new == $adj->harga_old) || ($adj->harga_old === null && $adj->harga_new == 0);
+                                $noFieldChange = !$adj->changed_fields;
+                            @endphp
+                            @if($noStokChange && $noHargaChange && $noFieldChange)
+                                <span class="text-gray-400">Tidak ada perubahan</span>
                             @endif
                         @endif
+
                     </td>
                     <td class="px-6 py-4">
                         <span class="text-gray-600">{{ $adj->note ?: '-' }}</span>
@@ -164,10 +190,16 @@
     function proceedToEdit() {
         const select = document.getElementById('selectedProductId');
         const id = select.value;
-        if(id) {
+        if (id) {
             window.location.href = '/admin/inventory-adjustments/product/' + id + '/edit';
         } else {
-            alert('Silakan pilih produk terlebih dahulu!');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Produk belum dipilih',
+                text: 'Silakan pilih produk terlebih dahulu!',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#4f46e5',
+            });
             select.focus();
         }
     }

@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('inventory_adjustments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('set null');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('action')->default('adjustment'); // 'created', 'updated', 'adjustment', 'order'
-            $table->integer('stok')->default(0); // Positif untuk tambah stok, negatif untuk kurangi stok
-            $table->integer('harga')->default(0); // Perubahan harga
-            $table->string('note')->nullable(); // Catatan perubahan
+            $table->string('action')->default('adjustment'); 
+            $table->integer('stok')->default(0);             
+            $table->decimal('harga_old', 15, 2)->nullable(); 
+            $table->decimal('harga_new', 15, 2)->nullable(); 
+            $table->string('note')->nullable();              
             $table->timestamps();
         });
     }

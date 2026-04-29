@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\InventoryAdjustment;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class InventoryAdjustmentController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.view'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('Inventory Adjustments'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -18,7 +19,7 @@ class InventoryAdjustmentController extends Controller
 
         $query = InventoryAdjustment::with(['product', 'user']);
 
-        if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.master')) {
+        if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product master')) {
             $query->whereHas('product', function($q) {
                 $q->where('user_id', auth()->id());
             });
@@ -37,21 +38,20 @@ class InventoryAdjustmentController extends Controller
         }
 
         $adjustments = $query->latest()->paginate(15)->withQueryString();
-        $productsList = \App\Models\Product::select('id', 'name')->orderBy('name')->get();
+        $productsList = Product::select('id', 'name')->orderBy('name')->get();
 
         return view('admin.inventory.index', compact('adjustments', 'productsList'));
     }
 
     public function editProduct($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product edit'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
-        $product = \App\Models\Product::findOrFail($id);
-        
-        // Cek jika user bukan admin dan bukan pemilik produk (jika permission bukan master)
-        if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.master') && $product->user_id !== auth()->id()) {
+        $product = Product::findOrFail($id);
+
+        if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product master') && $product->user_id !== auth()->id()) {
             return redirect()->route('inventory.index')->with('error', 'Anda tidak memiliki akses untuk mengedit produk ini.');
         }
 
@@ -60,7 +60,7 @@ class InventoryAdjustmentController extends Controller
 
     public function updateProduct(Request $request, $id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product edit'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -74,21 +74,30 @@ class InventoryAdjustmentController extends Controller
             'edit_reason' => 'required|string'
         ]);
 
-        $product = \App\Models\Product::findOrFail($id);
-        
-        if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.master') && $product->user_id !== auth()->id()) {
+        $product = Product::findOrFail($id);
+
+        if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product master') && $product->user_id !== auth()->id()) {
             return redirect()->route('inventory.index')->with('error', 'Anda tidak memiliki akses untuk mengedit produk ini.');
         }
 
         $oldStok = $product->stok;
         $oldData = $product->getOriginal();
 
+        // Deteksi perubahan nama dan deskripsi sebelum disimpan
+        $changedFields = [];
+        if ($oldData['name'] !== $request->name) {
+            $changedFields[] = 'nama';
+        }
+        if (($oldData['description'] ?? '') !== ($request->description ?? '')) {
+            $changedFields[] = 'deskripsi';
+        }
+
         $product->name = $request->name;
         $product->description = $request->description;
-        
+
         $stokDifference = $request->stok - $oldStok;
         $product->stok = $request->stok;
-        
+
         $product->price = $request->price;
         $product->category = $request->category;
 
@@ -102,16 +111,15 @@ class InventoryAdjustmentController extends Controller
 
         $product->save();
 
-        $hargaDifference = $request->price - $product->getOriginal('price');
-
-        // Record adjustment and edit history
         InventoryAdjustment::create([
             'product_id' => $product->id,
             'user_id' => auth()->id(),
             'action' => 'adjustment',
             'stok' => $stokDifference,
-            'harga' => $hargaDifference,
-            'note' => $request->edit_reason
+            'harga_old' => $oldData['price'],
+            'harga_new' => $request->price,
+            'note' => $request->edit_reason,
+            'changed_fields' => !empty($changedFields) ? implode(',', $changedFields) : null,
         ]);
 
         if (auth()->check()) {

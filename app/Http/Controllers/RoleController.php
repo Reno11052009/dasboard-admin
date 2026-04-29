@@ -7,18 +7,17 @@ use Illuminate\Http\Request;
 
 class RoleController extends Controller
 {
-    // Define all available permissions in the system
     private $availablePermissions = [
-        'product' => ['product.view', 'product.create', 'product.edit', 'product.delete', 'product.master'],
-        'order'   => ['order.view', 'order.edit', 'order.delete'],
-        'user'    => ['user.view', 'user.create', 'user.edit', 'user.delete'],
-        'role'    => ['role.view', 'role.create', 'role.edit', 'role.delete'],
+        'product'   => ['product view', 'product create', 'product edit', 'product delete', 'product master', 'Inventory Adjustments'],
+        'order'     => ['order view', 'order edit', 'order delete'],
+        'user'      => ['user view', 'user create', 'user edit', 'user delete'],
+        'role'      => ['role view', 'role create', 'role edit', 'role delete'],
     ];
 
     public function index(Request $request)
     {
         // Only Super Admin or someone with role.view permission can access
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role.view'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role view'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -28,7 +27,7 @@ class RoleController extends Controller
 
     public function create()
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role.create'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role create'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -38,7 +37,7 @@ class RoleController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role.create'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role create'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -57,13 +56,12 @@ class RoleController extends Controller
 
     public function edit($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role edit'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
         $role = Role::findOrFail($id);
         
-        // Prevent editing Super Admin to avoid lockouts
         if ($role->name === 'Super Admin' && !auth()->user()->isSuperAdmin()) {
             return redirect()->route('roles')->with('error', 'Anda tidak dapat mengedit Super Admin.');
         }
@@ -74,7 +72,7 @@ class RoleController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role edit'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -87,7 +85,6 @@ class RoleController extends Controller
 
         $role->name = $request->name;
         
-        // If updating Super Admin, ensure they don't lose permissions
         if ($role->name === 'Super Admin') {
             $allPerms = [];
             foreach ($this->availablePermissions as $group => $perms) {
@@ -105,7 +102,7 @@ class RoleController extends Controller
 
     public function destroy($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role.delete'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('role delete'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 

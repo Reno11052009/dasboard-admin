@@ -14,8 +14,10 @@ class InventoryAdjustment extends Model
         'user_id',
         'action',
         'stok',
-        'harga',
+        'harga_old',
+        'harga_new',
         'note',
+        'changed_fields',
         'created_at',
         'updated_at'
     ];

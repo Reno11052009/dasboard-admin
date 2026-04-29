@@ -9,7 +9,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.view'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user view'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -43,7 +43,7 @@ class UserController extends Controller
 
     public function create()
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.create'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user create'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -53,7 +53,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.create'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user create'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -76,7 +76,7 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user edit'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -87,7 +87,7 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user edit'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 
@@ -115,7 +115,7 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user.delete'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('user delete'))) {
             return redirect('/')->with('error', 'Akses ditolak');
         }
 

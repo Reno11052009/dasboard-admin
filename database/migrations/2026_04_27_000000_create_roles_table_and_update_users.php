@@ -12,7 +12,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. Create roles table
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
@@ -20,7 +19,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 2. Insert default roles
         $allPermissions = json_encode([
             'product view', 'product create', 'product edit', 'product delete', "master product",
             'order view', 'order edit', 'order delete',
@@ -43,12 +41,10 @@ return new class extends Migration
             ['name' => 'User', 'permissions' => $userPermissions, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // 3. Add role_id to users and migrate data
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('role_id')->nullable()->after('id')->constrained('roles')->nullOnDelete();
         });
 
-        // Migrate existing roles
         $superAdminRole = DB::table('roles')->where('name', 'Super Admin')->first();
         $adminRole = DB::table('roles')->where('name', 'Admin')->first();
         $userRole = DB::table('roles')->where('name', 'User')->first();
@@ -57,10 +53,8 @@ return new class extends Migration
         DB::table('users')->where('role', 'admin')->update(['role_id' => $adminRole->id ?? null]);
         DB::table('users')->where('role', 'user')->update(['role_id' => $userRole->id ?? null]);
 
-        // Users without role get the default User role
         DB::table('users')->whereNull('role_id')->update(['role_id' => $userRole->id ?? null]);
 
-        // 4. Drop the old enum column
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('role');
         });

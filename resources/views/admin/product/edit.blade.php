@@ -45,19 +45,18 @@
                         placeholder="Contoh: Akses Premium, E-book, dll.">
                 </div>
 
+                <div>
+                    <label for="image">Gambar Produk</label>
+                    <input type="file" name="image" id="image" accept="image/*"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah Stok</label>
                         <input type="number" name="stok" value="{{ $product->stok }}" required
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none transition">
                     </div>
-                </div>
-
-                <div>
-                    <label for="image">Gambar Produk</label>
-                    <input type="file" name="image" id="image" accept="image/*"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none transition">
-                </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Harga (Rp)</label>

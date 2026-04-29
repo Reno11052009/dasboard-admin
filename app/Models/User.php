@@ -60,14 +60,13 @@ class User extends Authenticatable
         if (!$this->role || !is_array($this->role->permissions)) {
             return false;
         }
-        
+
         $permWithSpace = str_replace('.', ' ', $permission);
         return in_array($permission, $this->role->permissions) || in_array($permWithSpace, $this->role->permissions);
     }
 
     public function isSuperAdmin()
     {
-        // Fallback jika belum menjalankan migrate
         if (is_string($this->role)) {
             return $this->role === 'super_admin';
         }

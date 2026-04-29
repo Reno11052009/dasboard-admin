@@ -15,7 +15,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.view'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product view'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -23,21 +23,21 @@ class ProductController extends Controller
 
         $limit = $request->get('limit', 10);
         $category = $request->get('category');
-        
+
         $query = Product::query();
 
         // Filter status: if user has master access, they can see all, otherwise only approved or their own products
-        if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.master')) {
-            $query->where(function($q) {
+        if (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product master')) {
+            $query->where(function ($q) {
                 $q->where('status', 'approved')
-                  ->orWhere('user_id', auth()->id());
+                    ->orWhere('user_id', auth()->id());
             });
         }
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
-                  ->orWhere('category', 'like', "%$search%");
+                    ->orWhere('category', 'like', "%$search%");
             });
         }
 
@@ -52,15 +52,15 @@ class ProductController extends Controller
         }
 
         $products = $query->latest()->paginate($perPage)->withQueryString();
-        
+
         $categories = Product::select('category')->distinct()->whereNotNull('category')->where('category', '!=', '')->pluck('category');
-        
+
         return view('admin.product.product', compact('products', 'categories'));
     }
 
     public function create()
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.create'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product create'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -69,7 +69,7 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.create'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product create'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -90,7 +90,7 @@ class ProductController extends Controller
         $product->price = $request->price;
         $product->category = $request->category;
 
-        $isMaster = auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('product.master');
+        $isMaster = auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('product master');
         $product->status = $isMaster ? 'approved' : 'pending';
 
         if ($request->hasFile('image')) {
@@ -100,27 +100,25 @@ class ProductController extends Controller
 
         $product->save();
 
-        // Create initial inventory adjustment record
         InventoryAdjustment::create([
             'product_id' => $product->id,
             'user_id' => auth()->id(),
             'action' => 'created',
             'stok' => $product->stok,
-            'harga' => $product->price,
+            'harga_old' => null,
+            'harga_new' => null,
             'note' => 'Penambahan produk baru'
         ]);
 
         if ($isMaster) {
             auth()->user()->notify(new ProductActionNotification('create', $product->name));
         } else {
-            // Find all users with product.master or super admins and notify them
-            $masterUsers = User::whereHas('role', function($q) {
+            $masterUsers = User::whereHas('role', function ($q) {
                 $q->where('name', 'Super Admin')
-                  ->orWhereJsonContains('permissions', 'product.master')
-                  ->orWhereJsonContains('permissions', 'product master');
+                    ->orWhereJsonContains('permissions', 'product.master')
+                    ->orWhereJsonContains('permissions', 'product master');
             })->get();
 
-            // If super admins don't have role relation for some reason (fallback)
             $legacySuperAdmins = User::where('role_id', null)->get()->filter->isSuperAdmin();
             $allMasterUsers = $masterUsers->merge($legacySuperAdmins);
 
@@ -135,7 +133,7 @@ class ProductController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.master'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product master'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -154,7 +152,7 @@ class ProductController extends Controller
             }
         }
 
-        // Mark related notifications as read for all users
+
         \Illuminate\Support\Facades\DB::table('notifications')
             ->where('type', 'App\Notifications\ProductApprovalRequest')
             ->where('data', 'like', '%"product_id":' . $id . '%')
@@ -165,7 +163,7 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.view'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product view'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -176,7 +174,7 @@ class ProductController extends Controller
 
     public function edit($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product edit'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -186,7 +184,7 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.edit'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product edit'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
@@ -203,14 +201,21 @@ class ProductController extends Controller
         $oldStok = $product->stok;
         $oldData = $product->getOriginal();
 
+        // Deteksi perubahan nama dan deskripsi sebelum disimpan
+        $changedFields = [];
+        if ($oldData['name'] !== $request->name) {
+            $changedFields[] = 'nama';
+        }
+        if (($oldData['description'] ?? '') !== ($request->description ?? '')) {
+            $changedFields[] = 'deskripsi';
+        }
+
         $product->name = $request->name;
         $product->description = $request->description;
-        
-        // Calculate stock difference
+
         $stokDifference = $request->stok - $oldStok;
-        // We set the new stock, but conceptually it matches the sum of history
         $product->stok = $request->stok;
-        
+
         $product->price = $request->price;
         $product->category = $request->category;
 
@@ -228,14 +233,15 @@ class ProductController extends Controller
 
         $hargaDifference = $request->price - $product->getOriginal('price');
 
-        // Record adjustment and edit history
         InventoryAdjustment::create([
             'product_id' => $product->id,
             'user_id' => auth()->id(),
             'action' => 'updated',
             'stok' => $stokDifference,
-            'harga' => $hargaDifference,
-            'note' => $reason
+            'harga_old' => $oldData['price'],
+            'harga_new' => $request->price,
+            'note' => $reason,
+            'changed_fields' => !empty($changedFields) ? implode(',', $changedFields) : null,
         ]);
 
         if (auth()->check()) {
@@ -247,19 +253,19 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product.delete'))) {
+        if (!auth()->check() || (!auth()->user()->isSuperAdmin() && !auth()->user()->hasPermission('product delete'))) {
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
         $product = Product::findOrFail($id);
-        
-        // Catat di history sebelum dihapus
+
         InventoryAdjustment::create([
             'product_id' => null,
             'user_id' => auth()->id(),
             'action' => 'deleted',
             'stok' => 0,
-            'harga' => 0,
+            'harga_old' => $product->price,
+            'harga_new' => 0,
             'note' => 'Produk dihapus: ' . $product->name
         ]);
 
