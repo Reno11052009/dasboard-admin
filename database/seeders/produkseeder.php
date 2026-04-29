@@ -11,7 +11,7 @@ class produkseeder extends Seeder
     public function run(): void
     {
         $products = [
-            ['name' => 'Laptop ASUS VivoBook', 'description' => 'Laptop高性能 dengan processor Intel Core i5', 'stok' => 25, 'price' => 5500000, 'category' => 'Electronics'],
+            ['name' => 'Laptop ASUS VivoBook', 'description' => 'Laptop dengan processor Intel Core i5', 'stok' => 25, 'price' => 5500000, 'category' => 'Electronics'],
             ['name' => 'Keyboard Mechanical', 'description' => 'Mechanical keyboard dengan RGB lighting', 'stok' => 50, 'price' => 450000, 'category' => 'Electronics'],
             ['name' => 'Mouse Wireless', 'description' => 'Mouse wireless dengan precision sensor', 'stok' => 80, 'price' => 150000, 'category' => 'Electronics'],
             ['name' => 'Monitor LG 24 Inch', 'description' => 'Monitor LED Full HD 24 inch', 'stok' => 15, 'price' => 1800000, 'category' => 'Electronics'],

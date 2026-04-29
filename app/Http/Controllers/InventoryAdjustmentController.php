@@ -65,13 +65,9 @@ class InventoryAdjustmentController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'stok' => 'required|integer',
-            'price' => 'required|numeric',
-            'image' => 'nullable|image|max:2048',
-            'category' => 'nullable|string|max:255',
-            'edit_reason' => 'required|string'
+            'tipe'        => 'required|in:tambah,kurang',
+            'jumlah'      => 'required|integer|min:1',
+            'edit_reason' => 'required|string|max:500',
         ]);
 
         $product = Product::findOrFail($id);
@@ -80,52 +76,26 @@ class InventoryAdjustmentController extends Controller
             return redirect()->route('inventory.index')->with('error', 'Anda tidak memiliki akses untuk mengedit produk ini.');
         }
 
-        $oldStok = $product->stok;
-        $oldData = $product->getOriginal();
+        $jumlah       = (int) $request->jumlah;
+        $delta        = $request->tipe === 'tambah' ? $jumlah : -$jumlah;
+        $stokBaru     = $product->stok + $delta;
 
-        // Deteksi perubahan nama dan deskripsi sebelum disimpan
-        $changedFields = [];
-        if ($oldData['name'] !== $request->name) {
-            $changedFields[] = 'nama';
-        }
-        if (($oldData['description'] ?? '') !== ($request->description ?? '')) {
-            $changedFields[] = 'deskripsi';
-        }
-
-        $product->name = $request->name;
-        $product->description = $request->description;
-
-        $stokDifference = $request->stok - $oldStok;
-        $product->stok = $request->stok;
-
-        $product->price = $request->price;
-        $product->category = $request->category;
-
-        if ($request->hasFile('image')) {
-            if ($product->image) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
-            }
-            $imagePath = $request->file('image')->store('products', 'public');
-            $product->image = $imagePath;
-        }
-
+        $product->stok = $stokBaru;
         $product->save();
 
         InventoryAdjustment::create([
             'product_id' => $product->id,
-            'user_id' => auth()->id(),
-            'action' => 'adjustment',
-            'stok' => $stokDifference,
-            'harga_old' => $oldData['price'],
-            'harga_new' => $request->price,
-            'note' => $request->edit_reason,
-            'changed_fields' => !empty($changedFields) ? implode(',', $changedFields) : null,
+            'user_id'    => auth()->id(),
+            'action'     => 'adjustment',
+            'stok'       => $delta,
+            'stok_total' => $stokBaru,
+            'note'       => $request->edit_reason,
         ]);
 
         if (auth()->check()) {
             auth()->user()->notify(new \App\Notifications\ProductActionNotification('update', $product->name));
         }
 
-        return redirect()->route('inventory.index')->with('success', 'Produk dan stok berhasil disesuaikan.');
+        return redirect()->route('inventory.index')->with('success', 'Stok berhasil disesuaikan.');
     }
 }

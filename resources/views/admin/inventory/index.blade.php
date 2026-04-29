@@ -33,7 +33,7 @@
             </form>
             <button onclick="openEditModal()" class="flex items-center gap-2 p-2.5 text-sm font-bold text-indigo-700 bg-indigo-50 rounded-lg border border-indigo-100 hover:bg-indigo-100 focus:ring-4 focus:outline-none focus:ring-indigo-100 transition shadow-sm cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                <span>Edit Produk</span>
+                <span>Edit Stok</span>
             </button>
         </div>
     </div>
@@ -44,11 +44,13 @@
         <table class="w-full text-left text-sm text-gray-600">
             <thead class="bg-gray-50 text-gray-700 uppercase text-xs font-semibold rounded-t-2xl border-b border-gray-100">
                 <tr>
-                    <th class="px-6 py-4">tanggal</th>
+                    <th class="px-6 py-4">Tanggal</th>
                     <th class="px-6 py-4">Produk</th>
                     <th class="px-6 py-4">Pengguna</th>
                     <th class="px-6 py-4">Aksi</th>
-                    <th class="px-6 py-4">Perubahan</th>
+                    <th class="px-6 py-4 text-center">In</th>
+                    <th class="px-6 py-4 text-center">Out</th>
+                    <th class="px-6 py-4 text-center">Total</th>
                     <th class="px-6 py-4">Catatan</th>
                 </tr>
             </thead>
@@ -77,52 +79,26 @@
                             <span class="px-2.5 py-1 bg-gray-100 text-gray-700 text-[11px] font-bold rounded-md uppercase tracking-wider">Penyesuaian</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4 text-xs font-mono">
-                        @if($adj->action === 'deleted')
-                            <span class="text-red-500">-</span>
+                    <td class="px-6 py-4 text-center font-mono">
+                        @if($adj->stok > 0)
+                            <span class="inline-block px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg text-sm">+{{ $adj->stok }}</span>
                         @else
-                            @if($adj->stok > 0)
-                                <div class="mb-1"><span class="font-bold text-gray-700">Stok:</span> <span class="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded">+{{ $adj->stok }}</span></div>
-                            @elseif($adj->stok < 0)
-                                <div class="mb-1"><span class="font-bold text-gray-700">Stok:</span> <span class="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">{{ $adj->stok }}</span></div>
-                            @endif
-
-                            @if($adj->harga_old !== null)
-                                @if($adj->harga_old != $adj->harga_new)
-                                    <div class="mb-1">
-                                        <span class="font-bold text-gray-700">Harga:</span>
-                                        <span class="text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded text-xs">
-                                            Rp {{ number_format($adj->harga_old, 0, ',', '.') }} ➔ Rp {{ number_format($adj->harga_new, 0, ',', '.') }}
-                                        </span>
-                                    </div>
-                                @endif
-                            @else
-                                @if($adj->harga_new > 0)
-                                    <div class="mb-1"><span class="font-bold text-gray-700">Harga:</span> <span class="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded">+ Rp {{ number_format($adj->harga_new, 0, ',', '.') }}</span></div>
-                                @elseif($adj->harga_new < 0)
-                                    <div class="mb-1"><span class="font-bold text-gray-700">Harga:</span> <span class="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">- Rp {{ number_format(abs($adj->harga_new), 0, ',', '.') }}</span></div>
-                                @endif
-                            @endif
-
-                            @if($adj->changed_fields)
-                                @foreach(explode(',', $adj->changed_fields) as $field)
-                                    <div class="mb-1">
-                                        <span class="font-bold text-gray-700">{{ ucfirst(trim($field)) }}:</span>
-                                        <span class="text-purple-600 font-bold bg-purple-50 px-2 py-0.5 rounded">diubah</span>
-                                    </div>
-                                @endforeach
-                            @endif
-
-                            @php
-                                $noStokChange = $adj->stok == 0;
-                                $noHargaChange = ($adj->harga_old !== null && $adj->harga_new == $adj->harga_old) || ($adj->harga_old === null && $adj->harga_new == 0);
-                                $noFieldChange = !$adj->changed_fields;
-                            @endphp
-                            @if($noStokChange && $noHargaChange && $noFieldChange)
-                                <span class="text-gray-400">Tidak ada perubahan</span>
-                            @endif
+                            <span class="text-gray-300">—</span>
                         @endif
-
+                    </td>
+                    <td class="px-6 py-4 text-center font-mono">
+                        @if($adj->stok < 0)
+                            <span class="inline-block px-2.5 py-1 bg-red-50 text-red-600 font-bold rounded-lg text-sm">{{ abs($adj->stok) }}</span>
+                        @else
+                            <span class="text-black">—</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 text-center font-mono">
+                        @if($adj->action === 'deleted')
+                            <span class="text-gray-400">—</span>
+                        @else
+                            <span class="inline-block px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold rounded-lg text-sm">{{ $adj->stok_total }}</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4">
                         <span class="text-gray-600">{{ $adj->note ?: '-' }}</span>
@@ -130,7 +106,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">Kosong</td>
+                    <td colspan="8" class="px-6 py-12 text-center text-gray-500">Kosong</td>
                 </tr>
                 @endforelse
             </tbody>

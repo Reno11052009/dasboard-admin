@@ -105,8 +105,7 @@ class ProductController extends Controller
             'user_id' => auth()->id(),
             'action' => 'created',
             'stok' => $product->stok,
-            'harga_old' => null,
-            'harga_new' => null,
+            'stok_total' => $product->stok,
             'note' => 'Penambahan produk baru'
         ]);
 
@@ -189,60 +188,29 @@ class ProductController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
-            'stok' => 'required|integer',
-            'price' => 'required|numeric',
-            'image' => 'nullable|image|max:2048',
-            'category' => 'nullable|string|max:255',
+            'price'       => 'required|numeric',
+            'image'       => 'nullable|image|max:2048',
+            'category'    => 'nullable|string|max:255',
         ]);
 
         $product = Product::findOrFail($id);
-        $oldStok = $product->stok;
-        $oldData = $product->getOriginal();
 
-        // Deteksi perubahan nama dan deskripsi sebelum disimpan
-        $changedFields = [];
-        if ($oldData['name'] !== $request->name) {
-            $changedFields[] = 'nama';
-        }
-        if (($oldData['description'] ?? '') !== ($request->description ?? '')) {
-            $changedFields[] = 'deskripsi';
-        }
-
-        $product->name = $request->name;
+        $product->name        = $request->name;
         $product->description = $request->description;
-
-        $stokDifference = $request->stok - $oldStok;
-        $product->stok = $request->stok;
-
-        $product->price = $request->price;
-        $product->category = $request->category;
+        $product->price       = $request->price;
+        $product->category    = $request->category;
 
         if ($request->hasFile('image')) {
             if ($product->image) {
                 Storage::disk('public')->delete($product->image);
             }
-            $imagePath = $request->file('image')->store('products', 'public');
+            $imagePath    = $request->file('image')->store('products', 'public');
             $product->image = $imagePath;
         }
 
         $product->save();
-
-        $reason = $request->input('edit_reason') ?: 'Perubahan detail produk atau stok';
-
-        $hargaDifference = $request->price - $product->getOriginal('price');
-
-        InventoryAdjustment::create([
-            'product_id' => $product->id,
-            'user_id' => auth()->id(),
-            'action' => 'updated',
-            'stok' => $stokDifference,
-            'harga_old' => $oldData['price'],
-            'harga_new' => $request->price,
-            'note' => $reason,
-            'changed_fields' => !empty($changedFields) ? implode(',', $changedFields) : null,
-        ]);
 
         if (auth()->check()) {
             auth()->user()->notify(new ProductActionNotification('update', $product->name));
@@ -264,8 +232,7 @@ class ProductController extends Controller
             'user_id' => auth()->id(),
             'action' => 'deleted',
             'stok' => 0,
-            'harga_old' => $product->price,
-            'harga_new' => 0,
+            'stok_total' => 0,
             'note' => 'Produk dihapus: ' . $product->name
         ]);
 

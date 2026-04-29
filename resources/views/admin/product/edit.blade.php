@@ -54,8 +54,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah Stok</label>
-                        <input type="number" name="stok" value="{{ $product->stok }}" required
-                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                        <input type="number" value="{{ $product->stok }}" disabled
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-400 outline-none cursor-not-allowed">
+                        <!-- <p class="text-[11px] text-gray-400 mt-1">Stok diubah melalui <a href="{{ route('inventory.index') }}" class="text-indigo-500 hover:underline">Inventory Adjustments</a>.</p> -->
                     </div>
 
                     <div>

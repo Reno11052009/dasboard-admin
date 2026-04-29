@@ -15,11 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('set null');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('action')->default('adjustment'); 
-            $table->integer('stok')->default(0);             
-            $table->decimal('harga_old', 15, 2)->nullable(); 
-            $table->decimal('harga_new', 15, 2)->nullable(); 
-            $table->string('note')->nullable();              
+            $table->string('action')->default('adjustment');
+            $table->integer('stok')->default(0);
+            $table->integer('stok_total')->default(0);
+            $table->string('note')->nullable();
             $table->timestamps();
         });
     }
