@@ -58,10 +58,13 @@
                 </div>
             </div>
 
-            {{-- <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end gap-3">
+            <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end gap-3">
+                @if(auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('product edit'))
                 <a href="{{ route('product.edit', $product->id) }}" class="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition shadow-sm">
                     Edit Produk
                 </a>
+                @endif
+                @if(auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('product delete'))
                 <form action="{{ route('product.delete', $product->id) }}" method="POST" class="inline">
                     @csrf
                     @method('DELETE')
@@ -69,10 +72,10 @@
                         Hapus Produk
                     </button>
                 </form>
-            </div> --}}
+                @endif
+            </div>
         </div>
     </div>
-
 </div>
 
 

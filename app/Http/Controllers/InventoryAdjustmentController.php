@@ -14,8 +14,10 @@ class InventoryAdjustmentController extends Controller
             return redirect('/')->with('error', 'Silakan login terlebih dahulu atau Anda tidak memiliki akses');
         }
 
-        $search = $request->get('search');
-        $action = $request->get('action');
+        $search    = $request->get('search');
+        $action    = $request->get('action');
+        $dateFrom  = $request->get('date_from');
+        $dateTo    = $request->get('date_to');
 
         $query = InventoryAdjustment::with(['product', 'user']);
 
@@ -35,6 +37,14 @@ class InventoryAdjustmentController extends Controller
 
         if ($action && $action !== 'all') {
             $query->where('action', $action);
+        }
+
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
         }
 
         $adjustments = $query->latest()->paginate(15)->withQueryString();

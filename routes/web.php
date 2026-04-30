@@ -30,7 +30,6 @@ Route::get('/admin/roles/{id}/edit', [RoleController::class, 'edit'])->name('rol
 Route::put('/admin/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
 Route::delete('/admin/roles/{id}', [RoleController::class, 'destroy'])->name('roles.delete');
 
-
 Route::get('/admin/account', [UserController::class, 'account'])->name('account');
 Route::put('/admin/account', [UserController::class, 'updateAccount'])->name('account.update');
 

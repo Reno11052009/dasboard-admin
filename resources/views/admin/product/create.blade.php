@@ -54,10 +54,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah Stok</label>
-                        <input type="number" name="stok" value="0" disabled
-                            class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-400 outline-none cursor-not-allowed"
+                        <input type="number" name="stok" value="0"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                             placeholder="0">
-                        <p class="text-[11px] text-gray-400 mt-1">Stok awal otomatis 0. Sesuaikan melalui Inventory Adjustments.</p>
                     </div>
 
                     <div>
